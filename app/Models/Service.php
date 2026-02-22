@@ -15,6 +15,7 @@ class Service extends Model
         'clinic_id',
         'name',
         'name_ar',
+        'image',
         'description',
         'price',
         'duration_minutes',

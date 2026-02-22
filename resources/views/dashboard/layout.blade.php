@@ -6,7 +6,17 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="description" content="" />
         <meta name="author" content="" />
-        <title>@yield('title', 'الداشبورد') - {{ config('app.name') }}</title>
+        <title>@yield('title', 'الداشبورد') - {{ isset($clinic) && $clinic ? $clinic->name : config('app.name') }}</title>
+        @if(isset($clinic) && $clinic)
+            @php $s = $clinic->settings ?? []; @endphp
+            @if(!empty($s['favicon']))<link rel="icon" href="{{ asset('storage/' . $s['favicon']) }}" />@endif
+            @if(!empty($s['icon_16']))<link rel="icon" type="image/png" sizes="16x16" href="{{ asset('storage/' . $s['icon_16']) }}" />@endif
+            @if(!empty($s['icon_32']))<link rel="icon" type="image/png" sizes="32x32" href="{{ asset('storage/' . $s['icon_32']) }}" />@endif
+            @if(!empty($s['icon_48']))<link rel="icon" type="image/png" sizes="48x48" href="{{ asset('storage/' . $s['icon_48']) }}" />@endif
+            @if(!empty($s['icon_180']))<link rel="apple-touch-icon" sizes="180x180" href="{{ asset('storage/' . $s['icon_180']) }}" />@endif
+            @if(!empty($s['icon_192']))<link rel="icon" type="image/png" sizes="192x192" href="{{ asset('storage/' . $s['icon_192']) }}" />@endif
+            @if(!empty($s['icon_512']))<link rel="icon" type="image/png" sizes="512x512" href="{{ asset('storage/' . $s['icon_512']) }}" />@endif
+        @endif
         <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
         <link href="{{ asset('dash-assets/css/styles.css') }}" rel="stylesheet" />
         <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
