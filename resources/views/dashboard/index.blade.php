@@ -1,558 +1,455 @@
 @extends('dashboard.layout')
 
-@section('title', 'الرئيسية')
+@section('title', 'لوحة التحكم الرئيسية')
 
 @section('content')
-                    <div class="container-fluid px-4">
-                        <h1 class="mt-4">Dashboard</h1>
-                        <ol class="breadcrumb mb-4">
-                            <li class="breadcrumb-item active">Dashboard</li>
-                        </ol>
-                        <div class="row">
-                            <div class="col-xl-3 col-md-6">
-                                <div class="card bg-primary text-white mb-4">
-                                    <div class="card-body">Primary Card</div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
-                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                    </div>
-                                </div>
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 mb-0">لوحة تحكم النظام SaaS</h1>
+                <p class="text-muted mb-0 small">نظرة عامة على العيادات والإحصائيات</p>
+            </div>
+            <div class="text-muted small">
+                <i class="fas fa-calendar-alt me-1"></i> {{ \Carbon\Carbon::now()->format('d/m/Y H:i') }}
+            </div>
+        </div>
+
+        <!-- بطاقات الإحصائيات الرئيسية -->
+        <div class="row g-4 mb-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-primary text-white mb-0 h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-white-50 small">إجمالي العيادات</div>
+                                <div class="h3 mb-0">{{ $totalClinics }}</div>
                             </div>
-                            <div class="col-xl-3 col-md-6">
-                                <div class="card bg-warning text-white mb-4">
-                                    <div class="card-body">Warning Card</div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
-                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-xl-3 col-md-6">
-                                <div class="card bg-success text-white mb-4">
-                                    <div class="card-body">Success Card</div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
-                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-xl-3 col-md-6">
-                                <div class="card bg-danger text-white mb-4">
-                                    <div class="card-body">Danger Card</div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
-                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                    </div>
-                                </div>
-                            </div>
+                            <i class="fas fa-hospital fa-2x opacity-50"></i>
                         </div>
-                        <div class="row">
-                            <div class="col-xl-6">
-                                <div class="card mb-4">
-                                    <div class="card-header">
-                                        <i class="fas fa-chart-area me-1"></i>
-                                        Area Chart Example
-                                    </div>
-                                    <div class="card-body"><canvas id="myAreaChart" width="100%" height="40"></canvas></div>
-                                </div>
-                            </div>
-                            <div class="col-xl-6">
-                                <div class="card mb-4">
-                                    <div class="card-header">
-                                        <i class="fas fa-chart-bar me-1"></i>
-                                        Bar Chart Example
-                                    </div>
-                                    <div class="card-body"><canvas id="myBarChart" width="100%" height="40"></canvas></div>
-                                </div>
-                            </div>
+                        <div class="mt-2 small">
+                            <span class="text-white-75">{{ $activeClinics }} نشطة</span>
+                            <span class="text-white-50 ms-2">{{ $totalClinics - $activeClinics }} غير نشطة</span>
                         </div>
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <i class="fas fa-table me-1"></i>
-                                DataTable Example
+                    </div>
+                    <div class="card-footer d-flex align-items-center justify-content-between bg-transparent border-0">
+                        <a class="small text-white stretched-link" href="#clinics-section">عرض التفاصيل</a>
+                        <div class="small text-white"><i class="fas fa-angle-left"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-success text-white mb-0 h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-white-50 small">إجمالي المستخدمين</div>
+                                <div class="h3 mb-0">{{ $totalUsers }}</div>
                             </div>
-                            <div class="card-body">
-                                <table id="datatablesSimple">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Position</th>
-                                            <th>Office</th>
-                                            <th>Age</th>
-                                            <th>Start date</th>
-                                            <th>Salary</th>
-                                        </tr>
-                                    </thead>
-                                    <tfoot>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Position</th>
-                                            <th>Office</th>
-                                            <th>Age</th>
-                                            <th>Start date</th>
-                                            <th>Salary</th>
-                                        </tr>
-                                    </tfoot>
-                                    <tbody>
-                                        <tr>
-                                            <td>Tiger Nixon</td>
-                                            <td>System Architect</td>
-                                            <td>Edinburgh</td>
-                                            <td>61</td>
-                                            <td>2011/04/25</td>
-                                            <td>$320,800</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Garrett Winters</td>
-                                            <td>Accountant</td>
-                                            <td>Tokyo</td>
-                                            <td>63</td>
-                                            <td>2011/07/25</td>
-                                            <td>$170,750</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Ashton Cox</td>
-                                            <td>Junior Technical Author</td>
-                                            <td>San Francisco</td>
-                                            <td>66</td>
-                                            <td>2009/01/12</td>
-                                            <td>$86,000</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Cedric Kelly</td>
-                                            <td>Senior Javascript Developer</td>
-                                            <td>Edinburgh</td>
-                                            <td>22</td>
-                                            <td>2012/03/29</td>
-                                            <td>$433,060</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Airi Satou</td>
-                                            <td>Accountant</td>
-                                            <td>Tokyo</td>
-                                            <td>33</td>
-                                            <td>2008/11/28</td>
-                                            <td>$162,700</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Brielle Williamson</td>
-                                            <td>Integration Specialist</td>
-                                            <td>New York</td>
-                                            <td>61</td>
-                                            <td>2012/12/02</td>
-                                            <td>$372,000</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Herrod Chandler</td>
-                                            <td>Sales Assistant</td>
-                                            <td>San Francisco</td>
-                                            <td>59</td>
-                                            <td>2012/08/06</td>
-                                            <td>$137,500</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Rhona Davidson</td>
-                                            <td>Integration Specialist</td>
-                                            <td>Tokyo</td>
-                                            <td>55</td>
-                                            <td>2010/10/14</td>
-                                            <td>$327,900</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Colleen Hurst</td>
-                                            <td>Javascript Developer</td>
-                                            <td>San Francisco</td>
-                                            <td>39</td>
-                                            <td>2009/09/15</td>
-                                            <td>$205,500</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Sonya Frost</td>
-                                            <td>Software Engineer</td>
-                                            <td>Edinburgh</td>
-                                            <td>23</td>
-                                            <td>2008/12/13</td>
-                                            <td>$103,600</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Jena Gaines</td>
-                                            <td>Office Manager</td>
-                                            <td>London</td>
-                                            <td>30</td>
-                                            <td>2008/12/19</td>
-                                            <td>$90,560</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Quinn Flynn</td>
-                                            <td>Support Lead</td>
-                                            <td>Edinburgh</td>
-                                            <td>22</td>
-                                            <td>2013/03/03</td>
-                                            <td>$342,000</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Charde Marshall</td>
-                                            <td>Regional Director</td>
-                                            <td>San Francisco</td>
-                                            <td>36</td>
-                                            <td>2008/10/16</td>
-                                            <td>$470,600</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Haley Kennedy</td>
-                                            <td>Senior Marketing Designer</td>
-                                            <td>London</td>
-                                            <td>43</td>
-                                            <td>2012/12/18</td>
-                                            <td>$313,500</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Tatyana Fitzpatrick</td>
-                                            <td>Regional Director</td>
-                                            <td>London</td>
-                                            <td>19</td>
-                                            <td>2010/03/17</td>
-                                            <td>$385,750</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Michael Silva</td>
-                                            <td>Marketing Designer</td>
-                                            <td>London</td>
-                                            <td>66</td>
-                                            <td>2012/11/27</td>
-                                            <td>$198,500</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Paul Byrd</td>
-                                            <td>Chief Financial Officer (CFO)</td>
-                                            <td>New York</td>
-                                            <td>64</td>
-                                            <td>2010/06/09</td>
-                                            <td>$725,000</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Gloria Little</td>
-                                            <td>Systems Administrator</td>
-                                            <td>New York</td>
-                                            <td>59</td>
-                                            <td>2009/04/10</td>
-                                            <td>$237,500</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Bradley Greer</td>
-                                            <td>Software Engineer</td>
-                                            <td>London</td>
-                                            <td>41</td>
-                                            <td>2012/10/13</td>
-                                            <td>$132,000</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Dai Rios</td>
-                                            <td>Personnel Lead</td>
-                                            <td>Edinburgh</td>
-                                            <td>35</td>
-                                            <td>2012/09/26</td>
-                                            <td>$217,500</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Jenette Caldwell</td>
-                                            <td>Development Lead</td>
-                                            <td>New York</td>
-                                            <td>30</td>
-                                            <td>2011/09/03</td>
-                                            <td>$345,000</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Yuri Berry</td>
-                                            <td>Chief Marketing Officer (CMO)</td>
-                                            <td>New York</td>
-                                            <td>40</td>
-                                            <td>2009/06/25</td>
-                                            <td>$675,000</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Caesar Vance</td>
-                                            <td>Pre-Sales Support</td>
-                                            <td>New York</td>
-                                            <td>21</td>
-                                            <td>2011/12/12</td>
-                                            <td>$106,450</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Doris Wilder</td>
-                                            <td>Sales Assistant</td>
-                                            <td>Sidney</td>
-                                            <td>23</td>
-                                            <td>2010/09/20</td>
-                                            <td>$85,600</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Angelica Ramos</td>
-                                            <td>Chief Executive Officer (CEO)</td>
-                                            <td>London</td>
-                                            <td>47</td>
-                                            <td>2009/10/09</td>
-                                            <td>$1,200,000</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Gavin Joyce</td>
-                                            <td>Developer</td>
-                                            <td>Edinburgh</td>
-                                            <td>42</td>
-                                            <td>2010/12/22</td>
-                                            <td>$92,575</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Jennifer Chang</td>
-                                            <td>Regional Director</td>
-                                            <td>Singapore</td>
-                                            <td>28</td>
-                                            <td>2010/11/14</td>
-                                            <td>$357,650</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Brenden Wagner</td>
-                                            <td>Software Engineer</td>
-                                            <td>San Francisco</td>
-                                            <td>28</td>
-                                            <td>2011/06/07</td>
-                                            <td>$206,850</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Fiona Green</td>
-                                            <td>Chief Operating Officer (COO)</td>
-                                            <td>San Francisco</td>
-                                            <td>48</td>
-                                            <td>2010/03/11</td>
-                                            <td>$850,000</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Shou Itou</td>
-                                            <td>Regional Marketing</td>
-                                            <td>Tokyo</td>
-                                            <td>20</td>
-                                            <td>2011/08/14</td>
-                                            <td>$163,000</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Michelle House</td>
-                                            <td>Integration Specialist</td>
-                                            <td>Sidney</td>
-                                            <td>37</td>
-                                            <td>2011/06/02</td>
-                                            <td>$95,400</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Suki Burks</td>
-                                            <td>Developer</td>
-                                            <td>London</td>
-                                            <td>53</td>
-                                            <td>2009/10/22</td>
-                                            <td>$114,500</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Prescott Bartlett</td>
-                                            <td>Technical Author</td>
-                                            <td>London</td>
-                                            <td>27</td>
-                                            <td>2011/05/07</td>
-                                            <td>$145,000</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Gavin Cortez</td>
-                                            <td>Team Leader</td>
-                                            <td>San Francisco</td>
-                                            <td>22</td>
-                                            <td>2008/10/26</td>
-                                            <td>$235,500</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Martena Mccray</td>
-                                            <td>Post-Sales support</td>
-                                            <td>Edinburgh</td>
-                                            <td>46</td>
-                                            <td>2011/03/09</td>
-                                            <td>$324,050</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Unity Butler</td>
-                                            <td>Marketing Designer</td>
-                                            <td>San Francisco</td>
-                                            <td>47</td>
-                                            <td>2009/12/09</td>
-                                            <td>$85,675</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Howard Hatfield</td>
-                                            <td>Office Manager</td>
-                                            <td>San Francisco</td>
-                                            <td>51</td>
-                                            <td>2008/12/16</td>
-                                            <td>$164,500</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Hope Fuentes</td>
-                                            <td>Secretary</td>
-                                            <td>San Francisco</td>
-                                            <td>41</td>
-                                            <td>2010/02/12</td>
-                                            <td>$109,850</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Vivian Harrell</td>
-                                            <td>Financial Controller</td>
-                                            <td>San Francisco</td>
-                                            <td>62</td>
-                                            <td>2009/02/14</td>
-                                            <td>$452,500</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Timothy Mooney</td>
-                                            <td>Office Manager</td>
-                                            <td>London</td>
-                                            <td>37</td>
-                                            <td>2008/12/11</td>
-                                            <td>$136,200</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Jackson Bradshaw</td>
-                                            <td>Director</td>
-                                            <td>New York</td>
-                                            <td>65</td>
-                                            <td>2008/09/26</td>
-                                            <td>$645,750</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Olivia Liang</td>
-                                            <td>Support Engineer</td>
-                                            <td>Singapore</td>
-                                            <td>64</td>
-                                            <td>2011/02/03</td>
-                                            <td>$234,500</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Bruno Nash</td>
-                                            <td>Software Engineer</td>
-                                            <td>London</td>
-                                            <td>38</td>
-                                            <td>2011/05/03</td>
-                                            <td>$163,500</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Sakura Yamamoto</td>
-                                            <td>Support Engineer</td>
-                                            <td>Tokyo</td>
-                                            <td>37</td>
-                                            <td>2009/08/19</td>
-                                            <td>$139,575</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Thor Walton</td>
-                                            <td>Developer</td>
-                                            <td>New York</td>
-                                            <td>61</td>
-                                            <td>2013/08/11</td>
-                                            <td>$98,540</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Finn Camacho</td>
-                                            <td>Support Engineer</td>
-                                            <td>San Francisco</td>
-                                            <td>47</td>
-                                            <td>2009/07/07</td>
-                                            <td>$87,500</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Serge Baldwin</td>
-                                            <td>Data Coordinator</td>
-                                            <td>Singapore</td>
-                                            <td>64</td>
-                                            <td>2012/04/09</td>
-                                            <td>$138,575</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Zenaida Frank</td>
-                                            <td>Software Engineer</td>
-                                            <td>New York</td>
-                                            <td>63</td>
-                                            <td>2010/01/04</td>
-                                            <td>$125,250</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Zorita Serrano</td>
-                                            <td>Software Engineer</td>
-                                            <td>San Francisco</td>
-                                            <td>56</td>
-                                            <td>2012/06/01</td>
-                                            <td>$115,000</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Jennifer Acosta</td>
-                                            <td>Junior Javascript Developer</td>
-                                            <td>Edinburgh</td>
-                                            <td>43</td>
-                                            <td>2013/02/01</td>
-                                            <td>$75,650</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Cara Stevens</td>
-                                            <td>Sales Assistant</td>
-                                            <td>New York</td>
-                                            <td>46</td>
-                                            <td>2011/12/06</td>
-                                            <td>$145,600</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Hermione Butler</td>
-                                            <td>Regional Director</td>
-                                            <td>London</td>
-                                            <td>47</td>
-                                            <td>2011/03/21</td>
-                                            <td>$356,250</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Lael Greer</td>
-                                            <td>Systems Administrator</td>
-                                            <td>London</td>
-                                            <td>21</td>
-                                            <td>2009/02/27</td>
-                                            <td>$103,500</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Jonas Alexander</td>
-                                            <td>Developer</td>
-                                            <td>San Francisco</td>
-                                            <td>30</td>
-                                            <td>2010/07/14</td>
-                                            <td>$86,500</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Shad Decker</td>
-                                            <td>Regional Director</td>
-                                            <td>Edinburgh</td>
-                                            <td>51</td>
-                                            <td>2008/11/13</td>
-                                            <td>$183,000</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Michael Bruce</td>
-                                            <td>Javascript Developer</td>
-                                            <td>Singapore</td>
-                                            <td>29</td>
-                                            <td>2011/06/27</td>
-                                            <td>$183,000</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Donna Snider</td>
-                                            <td>Customer Support</td>
-                                            <td>New York</td>
-                                            <td>27</td>
-                                            <td>2011/01/25</td>
-                                            <td>$112,000</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <i class="fas fa-users fa-2x opacity-50"></i>
+                        </div>
+                        <div class="mt-2 small text-white-75">
+                            <i class="fas fa-user-md me-1"></i> مديرين وموظفين
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex align-items-center justify-content-between bg-transparent border-0">
+                        <a class="small text-white stretched-link" href="#users-section">عرض التفاصيل</a>
+                        <div class="small text-white"><i class="fas fa-angle-left"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-warning text-white mb-0 h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-white-50 small">إجمالي المواعيد</div>
+                                <div class="h3 mb-0">{{ $totalAppointments }}</div>
+                            </div>
+                            <i class="fas fa-calendar-check fa-2x opacity-50"></i>
+                        </div>
+                        <div class="mt-2 small">
+                            <span class="text-white-75">{{ $thisMonthAppointments }} هذا الشهر</span>
+                            <span class="ms-2 @if($appointmentsGrowth >= 0) text-success @else text-danger @endif">
+                                <i class="fas fa-arrow-@if($appointmentsGrowth >= 0) up @else down @endif me-1"></i>
+                                {{ number_format(abs($appointmentsGrowth), 1) }}%
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex align-items-center justify-content-between bg-transparent border-0">
+                        <a class="small text-white stretched-link" href="{{ route('dashboard.appointments.index') }}">عرض المواعيد</a>
+                        <div class="small text-white"><i class="fas fa-angle-left"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-info text-white mb-0 h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-white-50 small">إجمالي المرضى</div>
+                                <div class="h3 mb-0">{{ $totalPatients }}</div>
+                            </div>
+                            <i class="fas fa-user-injured fa-2x opacity-50"></i>
+                        </div>
+                        <div class="mt-2 small text-white-75">
+                            <i class="fas fa-heartbeat me-1"></i> مراجعين مسجلين
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex align-items-center justify-content-between bg-transparent border-0">
+                        <a class="small text-white stretched-link" href="{{ route('dashboard.patients.index') }}">عرض المرضى</a>
+                        <div class="small text-white"><i class="fas fa-angle-left"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- إحصائيات إضافية -->
+        <div class="row g-4 mb-4">
+            <div class="col-xl-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="fas fa-concierge-bell me-2"></i>الخدمات</h6>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="h2 mb-0 text-primary">{{ $totalServices }}</div>
+                        <small class="text-muted">خدمة مسجلة</small>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a href="{{ route('dashboard.services.index') }}" class="stretched-link"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="fas fa-newspaper me-2"></i>المقالات</h6>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="h2 mb-0 text-success">{{ $publishedArticles }}</div>
+                        <small class="text-muted">منشورة من أصل {{ $totalArticles }} مقال</small>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a href="{{ route('dashboard.articles.index') }}" class="stretched-link"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i>الفواتير</h6>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="h2 mb-0 text-info">{{ number_format($totalRevenue, 2) }}</div>
+                        <small class="text-muted">الإيرادات ({{ $paidInvoices }} مدفوعة)</small>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a href="{{ route('dashboard.invoices.index') }}" class="stretched-link"></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- حالة المواعيد -->
+        <div class="row g-4 mb-4" id="appointments-section">
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-warning h-100">
+                    <div class="card-body text-center">
+                        <div class="text-warning mb-2"><i class="fas fa-calendar-alt fa-2x"></i></div>
+                        <div class="h3 mb-0">{{ $pendingAppointments }}</div>
+                        <small class="text-muted">جدولة</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-success h-100">
+                    <div class="card-body text-center">
+                        <div class="text-success mb-2"><i class="fas fa-check-circle fa-2x"></i></div>
+                        <div class="h3 mb-0">{{ $confirmedAppointments }}</div>
+                        <small class="text-muted">مؤكدة</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-info h-100">
+                    <div class="card-body text-center">
+                        <div class="text-info mb-2"><i class="fas fa-check-double fa-2x"></i></div>
+                        <div class="h3 mb-0">{{ $completedAppointments }}</div>
+                        <small class="text-muted">مكتملة</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-danger h-100">
+                    <div class="card-body text-center">
+                        <div class="text-danger mb-2"><i class="fas fa-times-circle fa-2x"></i></div>
+                        <div class="h3 mb-0">{{ $cancelledAppointments }}</div>
+                        <small class="text-muted">ملغاة</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- المواعيد القادمة -->
+        @if($upcomingAppointments->count() > 0)
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h6 class="mb-0"><i class="fas fa-calendar-day me-2"></i>المواعيد القادمة</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>المريض</th>
+                                <th>الخدمة</th>
+                                <th>العيادة</th>
+                                <th>التاريخ</th>
+                                <th>الوقت</th>
+                                <th>الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($upcomingAppointments as $appointment)
+                            <tr>
+                                <td>{{ $appointment->patient?->name ?? '—' }}</td>
+                                <td>{{ $appointment->service?->name ?? '—' }}</td>
+                                <td>{{ $appointment->clinic?->name ?? '—' }}</td>
+                                <td>{{ \Carbon\Carbon::parse($appointment->appointment_date)->format('Y-m-d') }}</td>
+                                <td>{{ $appointment->start_time ?? '—' }}</td>
+                                <td>
+                                    <span class="badge bg-{{ $appointment->status === 'confirmed' ? 'success' : ($appointment->status === 'scheduled' ? 'warning' : 'secondary') }}">
+                                        @if($appointment->status === 'confirmed') مؤكد
+                                        @elseif($appointment->status === 'scheduled') جدولة
+                                        @else {{ $appointment->status }}
+                                        @endif
+                                    </span>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        <!-- العيادات النشطة مؤخراً -->
+        <div class="row g-4 mb-4" id="clinics-section">
+            <div class="col-xl-6">
+                <div class="card h-100">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="fas fa-hospital-alt me-2"></i>العيادات النشطة مؤخراً</h6>
+                    </div>
+                    <div class="card-body">
+                        @if($recentClinics->count() > 0)
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>اسم العيادة</th>
+                                        <th>الخطة</th>
+                                        <th>تاريخ الإضافة</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($recentClinics as $clinic)
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-primary me-1">نشط</span>
+                                            {{ $clinic->name }}
+                                        </td>
+                                        <td>
+                                            @if($clinic->subscription_plan)
+                                                <span class="badge bg-info">{{ $clinic->subscription_plan }}</span>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-muted">{{ $clinic->created_at->format('Y-m-d') }}</td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        @else
+                        <p class="text-muted text-center mb-0">لا توجد عيادات نشطة بعد</p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- المقالات الأخيرة -->
+            <div class="col-xl-6">
+                <div class="card h-100">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="fas fa-rss me-2"></i>المقالات الأخيرة</h6>
+                    </div>
+                    <div class="card-body">
+                        @if($recentArticles->count() > 0)
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>العنوان</th>
+                                        <th>الكاتب</th>
+                                        <th>الحالة</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($recentArticles as $article)
+                                    <tr>
+                                        <td>
+                                            @if($article->is_favorite)
+                                                <i class="fas fa-star text-warning me-1"></i>
+                                            @endif
+                                            <a href="{{ route('dashboard.articles.show', $article) }}" class="text-decoration-none">
+                                                {{ Str::limit($article->title, 40) }}
+                                            </a>
+                                        </td>
+                                        <td>{{ $article->user?->name ?? '—' }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ $article->is_published ? 'success' : 'secondary' }}">
+                                                {{ $article->is_published ? 'منشور' : 'مسودة' }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        @else
+                        <p class="text-muted text-center mb-0">لا توجد مقالات بعد</p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- مخطط المواعيد لآخر 7 أيام -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>المواعيد خلال آخر 7 أيام</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="appointmentsChart" height="100"></canvas>
+            </div>
+        </div>
+
+        <!-- إحصائيات العيادات حسب الاشتراك -->
+        <div class="row g-4" id="users-section">
+            <div class="col-xl-6">
+                <div class="card h-100">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="fas fa-tags me-2"></i>العيادات حسب خطط الاشتراك</h6>
+                    </div>
+                    <div class="card-body">
+                        @if($clinicsByPlan->count() > 0)
+                        <div class="table-responsive">
+                            <table class="table table-bordered mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>خطة الاشتراك</th>
+                                        <th class="text-center">عدد العيادات</th>
+                                        <th class="text-center">النسبة</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($clinicsByPlan as $plan => $count)
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-info">{{ $plan ?: 'بدون خطة' }}</span>
+                                        </td>
+                                        <td class="text-center fw-bold">{{ $count }}</td>
+                                        <td class="text-center">
+                                            {{ $totalClinics > 0 ? number_format(($count / $totalClinics) * 100, 1) : 0 }}%
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        @else
+                        <p class="text-muted text-center mb-0">لا توجد بيانات خطط اشتراك</p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- ملخص سريع -->
+            <div class="col-xl-6">
+                <div class="card h-100">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i>ملخص سريع</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded text-center">
+                                    <div class="h4 mb-1 text-primary">{{ $draftArticles }}</div>
+                                    <small class="text-muted">مقالات مسودة</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded text-center">
+                                    <div class="h4 mb-1 text-warning">{{ $favoriteArticles }}</div>
+                                    <small class="text-muted">مقالات مفضلة</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded text-center">
+                                    <div class="h4 mb-1 text-success">{{ $pendingInvoices }}</div>
+                                    <small class="text-muted">فواتير معلقة</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded text-center">
+                                    <div class="h4 mb-1 text-info">{{ $totalInvoices }}</div>
+                                    <small class="text-muted">إجمالي الفواتير</small>
+                                </div>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('appointmentsChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: [{!! collect($last7Days)->pluck('label')->map(fn($l) => "'$l'")->implode(',') !!}],
+                        datasets: [{
+                            label: 'المواعيد',
+                            data: [{!! collect($last7Days)->pluck('count')->implode(',') !!}],
+                            backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1,
+                            borderRadius: 5,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 @endsection

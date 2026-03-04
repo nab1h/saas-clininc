@@ -22,12 +22,14 @@ class Article extends Model
         'is_published',
         'published_at',
         'views_count',
+        'is_favorite',
     ];
 
     protected function casts(): array
     {
         return [
             'is_published' => 'boolean',
+            'is_favorite' => 'boolean',
             'published_at' => 'datetime',
         ];
     }
@@ -57,5 +59,15 @@ class Article extends Model
     public function topLevelComments(): HasMany
     {
         return $this->hasMany(Comment::class)->whereNull('parent_id');
+    }
+
+    public function favorites(): HasMany
+    {
+        return $this->hasMany(FavoriteArticle::class);
+    }
+
+    public function isFavoredBy($userId): bool
+    {
+        return $this->favorites()->where('user_id', $userId)->exists();
     }
 }

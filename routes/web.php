@@ -31,6 +31,13 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
     Route::delete('/services/{service}', [ServiceController::class, 'destroy'])->name('services.destroy');
     Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
     Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
+    Route::get('/articles/create', [ArticleController::class, 'create'])->name('articles.create');
+    Route::post('/articles', [ArticleController::class, 'store'])->name('articles.store');
+    Route::get('/articles/{article}', [ArticleController::class, 'show'])->name('articles.show');
+    Route::get('/articles/{article}/edit', [ArticleController::class, 'edit'])->name('articles.edit');
+    Route::put('/articles/{article}', [ArticleController::class, 'update'])->name('articles.update');
+    Route::delete('/articles/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy');
+    Route::post('/articles/{article}/favorite', [ArticleController::class, 'toggleFavorite'])->name('articles.favorite');
     Route::get('/links', [LinkController::class, 'index'])->name('links.index');
     Route::get('/links/create', [LinkController::class, 'create'])->name('links.create');
     Route::post('/links', [LinkController::class, 'store'])->name('links.store');

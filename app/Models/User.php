@@ -59,4 +59,16 @@ class User extends Authenticatable
     {
         return $this->hasMany(Comment::class);
     }
+
+    public function favoriteArticles(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Article::class, 'favorite_articles')
+            ->withTimestamps()
+            ->orderBy('favorite_articles.created_at', 'desc');
+    }
+
+    public function isFavoriteArticle($articleId): bool
+    {
+        return $this->favoriteArticles()->where('article_id', $articleId)->exists();
+    }
 }
