@@ -7,6 +7,8 @@ use App\Models\Link;
 use App\Models\Service;
 use App\Models\Comment;
 use App\Models\Clinic;
+use App\Models\User;
+use App\Models\Role;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -50,6 +52,32 @@ Route::get('/{slug}/comments', function ($slug) {
     $clinic = Clinic::where('slug', $slug)->firstOrFail();
     $articleIds = Article::where('clinic_id', $clinic->id)->pluck('id');
     return Comment::whereIn('article_id', $articleIds)->get();
+});
+
+Route::get('/clinics/{clinic}/users', function (Clinic $clinic) {
+    return response()->json([
+        'users' => $clinic->users->map(function ($user) {
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role_name' => $user->pivot->role_id ? Role::find($user->pivot->role_id)?->name : 'بدون دور',
+            ];
+        }),
+    ]);
+});
+
+Route::get('/users/{userId}/clinics', function ($userId) {
+    $user = User::findOrFail($userId);
+    return response()->json([
+        'clinics' => $user->clinics->map(function ($clinic) {
+            return [
+                'clinic_id' => $clinic->id,
+                'name' => $clinic->name,
+                'role_name' => $clinic->pivot->role_id ? Role::find($clinic->pivot->role_id)?->name : 'بدون دور',
+            ];
+        }),
+    ]);
 });
 
 Route::post('/{slug}/comments', function (Request $request, $slug) {

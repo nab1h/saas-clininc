@@ -24,6 +24,41 @@ class Clinic extends Model
         'is_active',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($clinic) {
+            if (empty($clinic->slug) && !empty($clinic->name)) {
+                $clinic->slug = static::generateUniqueSlug($clinic->name);
+            }
+        });
+
+        static::updating(function ($clinic) {
+            if ($clinic->isDirty('name') && !empty($clinic->name)) {
+                $clinic->slug = static::generateUniqueSlug($clinic->name);
+            }
+        });
+    }
+
+    protected static function generateUniqueSlug(string $name): string
+    {
+        $slug = \Illuminate\Support\Str::slug($name);
+        $originalSlug = $slug;
+        $counter = 1;
+
+        while (static::where('slug', $slug)->where('id', '!=', request()->route('clinic'))->exists()) {
+            $slug = $originalSlug . '-' . $counter++;
+        }
+
+        return $slug;
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
     protected function casts(): array
     {
         return [

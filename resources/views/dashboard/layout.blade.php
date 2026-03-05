@@ -58,6 +58,16 @@
                                 Dashboard
                             </a>
 
+                            <a class="nav-link" href="{{ route('dashboard.users.index') }}">
+                                <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                                Users
+                            </a>
+
+                            <a class="nav-link" href="{{ route('dashboard.clinics.index') }}">
+                                <div class="sb-nav-link-icon"><i class="fas fa-hospital"></i></div>
+                                Clinics
+                            </a>
+
                             <a class="nav-link" href="{{ route('dashboard.patients.index') }}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                                 Patients
@@ -120,7 +130,7 @@
                                     </a>
                                     <div class="collapse" id="pagesCollapseAuth" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordionPages">
                                         <nav class="sb-sidenav-menu-nested nav">
-                                            <a class="nav-link" href="login.html">Login</a>
+                                            <a class="nav-link" href="login.php">Login</a>
                                             <a class="nav-link" href="register.html">Register</a>
                                             <a class="nav-link" href="password.html">Forgot Password</a>
                                         </nav>
@@ -190,6 +200,7 @@
 
 
 <a href="{{ route('dashboard.index') }}" class="block px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-700">الرئيسية</a>
+                <a href="{{ route('dashboard.clinics.index') }}" class="block px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-700">العيادات</a>
                 <a href="" class="block px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-700">المرضى</a>
                 <a href="{{ route('dashboard.appointments.index') }}" class="block px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-700">المواعيد</a>
                 <a href="{{ route('dashboard.services.index') }}" class="block px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-700">الخدمات</a>
