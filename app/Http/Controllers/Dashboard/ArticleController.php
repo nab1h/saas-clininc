@@ -7,16 +7,36 @@ use App\Models\Article;
 use App\Models\Clinic;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class ArticleController extends Controller
 {
+    protected function getCurrentClinic(): ?Clinic
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return null;
+        }
+
+        $currentClinicId = session('current_clinic_id');
+        if ($currentClinicId) {
+            return Clinic::find($currentClinicId);
+        }
+
+        return $user->clinics->first();
+    }
+
     public function index(Request $request): View
     {
-        $clinic = Clinic::where('is_active', true)->first() ?? Clinic::first();
+        $clinic = $this->getCurrentClinic();
 
-        $query = Article::when($clinic, fn ($q) => $q->where('clinic_id', $clinic->id))
+        if (!$clinic) {
+            return view('dashboard.articles.index', ['articles' => collect(), 'status' => 'all', 'clinic' => null]);
+        }
+
+        $query = $clinic->articles()
             ->with('user')
             ->orderBy('created_at', 'desc');
 
@@ -38,18 +58,18 @@ class ArticleController extends Controller
 
     public function create(): View|RedirectResponse
     {
-        $clinic = Clinic::where('is_active', true)->first() ?? Clinic::first();
+        $clinic = $this->getCurrentClinic();
         if (!$clinic) {
-            return redirect()->route('dashboard.articles.index')->with('error', 'لا توجد عيادة. أضف عيادة أولاً.');
+            return redirect()->route('dashboard.articles.index')->with('error', 'لا توجد عيادة. يجب تعيينك لعيادة أولاً.');
         }
         return view('dashboard.articles.form', ['article' => null, 'clinic' => $clinic]);
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $clinic = Clinic::where('is_active', true)->first() ?? Clinic::first();
+        $clinic = $this->getCurrentClinic();
         if (!$clinic) {
-            return redirect()->route('dashboard.articles.index')->with('error', 'لا توجد عيادة.');
+            return redirect()->route('dashboard.articles.index')->with('error', 'لا توجد عيادة. يجب تعيينك لعيادة أولاً.');
         }
 
         $validated = $request->validate([

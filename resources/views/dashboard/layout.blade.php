@@ -23,10 +23,31 @@
     </head>
     <body class="sb-nav-fixed">
         <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+            <!-- Clinic Selector (if user has multiple clinics) -->
+            @if(isset($userClinics) && count($userClinics) > 1)
+                <div class="ms-2">
+                    <select class="form-select form-select-sm bg-dark text-white border-secondary" id="clinicSelector" onchange="switchClinic(this.value)">
+                        @foreach($userClinics as $c)
+                            <option value="{{ $c->id }}" {{ isset($currentClinicId) && $currentClinicId == $c->id ? 'selected' : '' }}>
+                                {{ $c->name }} {{ isset($currentClinicId) && $currentClinicId == $c->id ? '(الحالي)' : '' }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
+
             <!-- Navbar Brand-->
-            <a class="navbar-brand ps-3" href="index.html">Start Bootstrap</a>
+            <a class="navbar-brand ps-3" href="{{ route('dashboard.index') }}">
+                @if(isset($currentClinic))
+                    {{ $currentClinic->name }}
+                @else
+                    {{ config('app.name') }}
+                @endif
+            </a>
+
             <!-- Sidebar Toggle-->
             <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
+
             <!-- Navbar Search-->
             <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
                 <div class="input-group">
@@ -34,19 +55,32 @@
                     <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
                 </div>
             </form>
+
             <!-- Navbar-->
             <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="#!">Settings</a></li>
-                        <li><a class="dropdown-item" href="#!">Activity Log</a></li>
-                        <li><hr class="dropdown-divider" /></li>
-                        <li><a class="dropdown-item" href="#!">Logout</a></li>
+                        <li><form id="logout-form" method="POST" action="{{ route('logout') }}" style="display:inline">@csrf<button type="submit" style="width:100%;background:none;border:none;text-align:left;padding:8px 16px;cursor:pointer;">Logout</button></form></li>
                     </ul>
                 </li>
             </ul>
         </nav>
+
+        <script>
+            function switchClinic(clinicId) {
+                fetch('/dashboard/switch-clinic', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `clinic_id=${clinicId}`
+                }).then(() => {
+                    window.location.reload();
+                });
+            }
+        </script>
         <div id="layoutSidenav">
             <div id="layoutSidenav_nav">
                 <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
@@ -58,15 +92,19 @@
                                 Dashboard
                             </a>
 
+                            @if(auth()->user()->isSuperAdmin() || auth()->user()->getRoleInClinic($currentClinicId ?? 0)?->slug === 'owner')
                             <a class="nav-link" href="{{ route('dashboard.users.index') }}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
                                 Users
                             </a>
+                            @endif
 
+                            @if(auth()->user()->isSuperAdmin())
                             <a class="nav-link" href="{{ route('dashboard.clinics.index') }}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-hospital"></i></div>
                                 Clinics
                             </a>
+                            @endif
 
                             <a class="nav-link" href="{{ route('dashboard.patients.index') }}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
@@ -114,7 +152,6 @@
                                     <a class="nav-link" href="layout-static.html">Static Navigation</a>
                                     <a class="nav-link" href="layout-sidenav-light.html">Light Sidenav</a>
                                     <a class="nav-link" href="{{ route('dashboard.booking.index') }}">Booking</a>
-                                    
                                 </nav>
                             </div>
                             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePages" aria-expanded="false" aria-controls="collapsePages">
@@ -161,7 +198,16 @@
                     </div>
                     <div class="sb-sidenav-footer">
                         <div class="small">Logged in as:</div>
-                        Start Bootstrap
+                        @if(isset($user))
+                            {{ $user->name }}
+                            @if($user->isSuperAdmin())
+                                (Super Admin)
+                            @elseif(isset($currentClinicId))
+                                {{ $user->getRoleInClinic($currentClinicId)?->name ?? '' }}
+                            @endif
+                        @else
+                            Start Bootstrap
+                        @endif
                     </div>
                 </nav>
             </div>
@@ -192,19 +238,3 @@
         <script src="{{ asset('dash-assets/js/datatables-simple-demo.js') }}"></script>
     </body>
 </html>
-
-
-
-
-
-
-
-<a href="{{ route('dashboard.index') }}" class="block px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-700">الرئيسية</a>
-                <a href="{{ route('dashboard.clinics.index') }}" class="block px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-700">العيادات</a>
-                <a href="" class="block px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-700">المرضى</a>
-                <a href="{{ route('dashboard.appointments.index') }}" class="block px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-700">المواعيد</a>
-                <a href="{{ route('dashboard.services.index') }}" class="block px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-700">الخدمات</a>
-                <a href="{{ route('dashboard.invoices.index') }}" class="block px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-700">الفواتير</a>
-                <a href="{{ route('dashboard.articles.index') }}" class="block px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-700">المقالات</a>
-                <a href="{{ route('dashboard.links.index') }}" class="block px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-700">الروابط</a>
-                <a href="{{ route('dashboard.settings.index') }}" class="block px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-700">الإعدادات</a>

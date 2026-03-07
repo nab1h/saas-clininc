@@ -47,8 +47,18 @@ class Clinic extends Model
         $originalSlug = $slug;
         $counter = 1;
 
-        while (static::where('slug', $slug)->where('id', '!=', request()->route('clinic'))->exists()) {
+        $query = static::where('slug', $slug);
+        $clinicId = request()->route('clinic');
+        if ($clinicId) {
+            $query->where('id', '!=', $clinicId);
+        }
+
+        while ($query->exists()) {
             $slug = $originalSlug . '-' . $counter++;
+            $query = static::where('slug', $slug);
+            if ($clinicId) {
+                $query->where('id', '!=', $clinicId);
+            }
         }
 
         return $slug;

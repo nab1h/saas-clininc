@@ -8,14 +8,37 @@ use App\Models\Service;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class ServiceController extends Controller
 {
+    protected function getCurrentClinic(): ?Clinic
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return null;
+        }
+
+        // Get current clinic from session
+        $currentClinicId = session('current_clinic_id');
+        if ($currentClinicId) {
+            return Clinic::find($currentClinicId);
+        }
+
+        // Fallback to user's first clinic
+        return $user->clinics->first();
+    }
+
     public function index(): View
     {
-        $clinic = Clinic::where('is_active', true)->first() ?? Clinic::first();
-        $services = Service::when($clinic, fn ($q) => $q->where('clinic_id', $clinic->id))
+        $clinic = $this->getCurrentClinic();
+
+        if (!$clinic) {
+            return view('dashboard.services.index', ['services' => collect()]);
+        }
+
+        $services = $clinic->services()
             ->orderBy('name')
             ->get();
 
@@ -24,18 +47,18 @@ class ServiceController extends Controller
 
     public function create(): View|RedirectResponse
     {
-        $clinic = Clinic::where('is_active', true)->first() ?? Clinic::first();
+        $clinic = $this->getCurrentClinic();
         if (! $clinic) {
-            return redirect()->route('dashboard.services.index')->with('error', 'لا توجد عيادة. أضف عيادة أولاً.');
+            return redirect()->route('dashboard.services.index')->with('error', 'لا توجد عيادة. يجب تعيينك لعيادة أولاً.');
         }
         return view('dashboard.services.form', ['service' => null, 'clinic' => $clinic]);
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $clinic = Clinic::where('is_active', true)->first() ?? Clinic::first();
-        if (! $clinic) {
-            return redirect()->route('dashboard.services.index')->with('error', 'لا توجد عيادة.');
+        $clinic = $this->getCurrentClinic();
+        if (!$clinic) {
+            return redirect()->route('dashboard.services.index')->with('error', 'لا توجد عيادة. يجب تعيينك لعيادة أولاً.');
         }
 
         $validated = $request->validate([

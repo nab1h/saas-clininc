@@ -12,6 +12,7 @@ use App\Models\Patient;
 use App\Models\Service;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -19,82 +20,146 @@ class DashboardController extends Controller
 {
     public function index(): View
     {
-        // إحصائيات النظام SaaS العامة
-        $totalClinics = Clinic::count();
-        $activeClinics = Clinic::where('is_active', true)->count();
-        $totalUsers = User::count();
-        $totalPatients = Patient::count();
-        $totalServices = Service::count();
-        $totalArticles = Article::count();
-        $totalInvoices = Invoice::count();
-        $totalAppointments = Appointment::count();
+        $currentClinic = session('current_clinic_id') ? Clinic::find(session('current_clinic_id')) : null;
+        $user = Auth::user();
+        $isAdmin = $user && $user->clinics->count() === 0; // User not assigned to any clinic is treated as admin
 
-        // إحصائيات المواعيد
-        $pendingAppointments = Appointment::where('status', 'scheduled')->count();
-        $confirmedAppointments = Appointment::where('status', 'confirmed')->count();
-        $completedAppointments = Appointment::where('status', 'completed')->count();
-        $cancelledAppointments = Appointment::where('status', 'cancelled')->count();
+        if ($currentClinic && !$isAdmin) {
+            // إحصائيات العيادة الحالية فقط
+            $totalClinics = $user->clinics->count();
+            $activeClinics = $user->clinics->where('is_active', true)->count();
+            $totalUsers = $currentClinic->users()->count();
+            $totalPatients = $currentClinic->patients()->count();
+            $totalServices = $currentClinic->services()->count();
+            $totalArticles = $currentClinic->articles()->count();
+            $totalInvoices = $currentClinic->invoices()->count();
+            $totalAppointments = $currentClinic->appointments()->count();
 
-        // إحصائيات الفواتير
-        $paidInvoices = Invoice::where('status', 'paid')->count();
-        $pendingInvoices = Invoice::where('status', 'pending')->count();
-        $totalRevenue = Invoice::where('status', 'paid')->sum('total');
+            // إحصائيات المواعيد
+            $pendingAppointments = $currentClinic->appointments()->where('status', 'scheduled')->count();
+            $confirmedAppointments = $currentClinic->appointments()->where('status', 'confirmed')->count();
+            $completedAppointments = $currentClinic->appointments()->where('status', 'completed')->count();
+            $cancelledAppointments = $currentClinic->appointments()->where('status', 'cancelled')->count();
 
-        // إحصائيات المقالات
-        $publishedArticles = Article::where('is_published', true)->count();
-        $draftArticles = Article::where('is_published', false)->count();
-        $favoriteArticles = Article::where('is_favorite', true)->count();
+            // إحصائيات الفواتير
+            $paidInvoices = $currentClinic->invoices()->where('status', 'paid')->count();
+            $pendingInvoices = $currentClinic->invoices()->where('status', 'pending')->count();
+            $totalRevenue = $currentClinic->invoices()->where('status', 'paid')->sum('total');
 
-        // إحصائيات العيادات حسب الاشتراك
-        $clinicsByPlan = Clinic::select('subscription_plan', DB::raw('count(*) as count'))
-            ->groupBy('subscription_plan')
-            ->get()
-            ->pluck('count', 'subscription_plan');
+            // إحصائيات المقالات
+            $publishedArticles = $currentClinic->articles()->where('is_published', true)->count();
+            $draftArticles = $currentClinic->articles()->where('is_published', false)->count();
+            $favoriteArticles = $currentClinic->articles()->where('is_favorite', true)->count();
 
-        // إحصائيات المواعيد لهذا الشهر
-        $thisMonthAppointments = Appointment::whereMonth('created_at', Carbon::now()->month)
-            ->whereYear('created_at', Carbon::now()->year)
-            ->count();
+            // إحصائيات العيادات حسب الاشتراك (للسوبر أدمن فقط)
+            $clinicsByPlan = collect();
+            $recentClinics = collect();
 
-        $lastMonthAppointments = Appointment::whereMonth('created_at', Carbon::now()->subMonth()->month)
-            ->whereYear('created_at', Carbon::now()->subMonth()->year)
-            ->count();
+            // نمو المواعيد
+            $thisMonthAppointments = $currentClinic->appointments()
+                ->whereYear('appointment_date', Carbon::now()->year)
+                ->whereMonth('appointment_date', Carbon::now()->month)
+                ->count();
 
-        $appointmentsGrowth = $lastMonthAppointments > 0
-            ? (($thisMonthAppointments - $lastMonthAppointments) / $lastMonthAppointments) * 100
-            : 0;
+            $lastMonthAppointments = $currentClinic->appointments()
+                ->whereYear('appointment_date', Carbon::now()->subMonth()->year)
+                ->whereMonth('appointment_date', Carbon::now()->subMonth()->month)
+                ->count();
 
-        // المواعيد لآخر 7 أيام (للرسم البياني)
-        $last7Days = collect();
-        for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i);
-            $last7Days->push([
-                'date' => $date->format('Y-m-d'),
-                'label' => $date->format('d/m'),
-                'count' => Appointment::whereDate('created_at', $date->format('Y-m-d'))->count(),
-            ]);
+            $appointmentsGrowth = $lastMonthAppointments > 0
+                ? round((($thisMonthAppointments - $lastMonthAppointments) / $lastMonthAppointments) * 100, 2)
+                : 0;
+
+            // المواعيد لآخر 7 أيام (للرسم البياني)
+            $last7Days = collect();
+            for ($i = 6; $i >= 0; $i--) {
+                $date = Carbon::now()->subDays($i);
+                $last7Days->push([
+                    'date' => $date->format('Y-m-d'),
+                    'label' => $date->format('d/m'),
+                    'count' => $currentClinic->appointments()->whereDate('created_at', $date->format('Y-m-d'))->count(),
+                ]);
+            }
+
+            // المواعيد القادمة
+            $upcomingAppointments = $currentClinic->appointments()->with(['patient', 'service', 'clinic'])
+                ->whereIn('status', ['scheduled', 'confirmed'])
+                ->where('appointment_date', '>=', Carbon::today())
+                ->orderBy('appointment_date')
+                ->orderBy('start_time')
+                ->take(5)
+                ->get();
+
+            // المقالات الأخيرة
+            $recentArticles = $currentClinic->articles()->with('user')
+                ->orderBy('created_at', 'desc')
+                ->take(5)
+                ->get();
+        } else {
+            // إحصائيات النظام SaaS العامة (للأدمن)
+            $totalClinics = Clinic::count();
+            $activeClinics = Clinic::where('is_active', true)->count();
+            $totalUsers = User::count();
+            $totalPatients = Patient::count();
+            $totalServices = Service::count();
+            $totalArticles = Article::count();
+            $totalInvoices = Invoice::count();
+            $totalAppointments = Appointment::count();
+
+            // إحصائيات المواعيد
+            $pendingAppointments = Appointment::where('status', 'scheduled')->count();
+            $confirmedAppointments = Appointment::where('status', 'confirmed')->count();
+            $completedAppointments = Appointment::where('status', 'completed')->count();
+            $cancelledAppointments = Appointment::where('status', 'cancelled')->count();
+
+            // إحصائيات الفواتير
+            $paidInvoices = Invoice::where('status', 'paid')->count();
+            $pendingInvoices = Invoice::where('status', 'pending')->count();
+            $totalRevenue = Invoice::where('status', 'paid')->sum('total');
+
+            // إحصائيات المقالات
+            $publishedArticles = Article::where('is_published', true)->count();
+            $draftArticles = Article::where('is_published', false)->count();
+            $favoriteArticles = Article::where('is_favorite', true)->count();
+
+            // إحصائيات العيادات حسب الاشتراك
+            $clinicsByPlan = Clinic::select('subscription_plan', DB::raw('count(*) as count'))
+                ->groupBy('subscription_plan')
+                ->get()
+                ->pluck('count', 'subscription_plan');
+
+            // المواعيد لآخر 7 أيام (للرسم البياني)
+            $last7Days = collect();
+            for ($i = 6; $i >= 0; $i--) {
+                $date = Carbon::now()->subDays($i);
+                $last7Days->push([
+                    'date' => $date->format('Y-m-d'),
+                    'label' => $date->format('d/m'),
+                    'count' => Appointment::whereDate('created_at', $date->format('Y-m-d'))->count(),
+                ]);
+            }
+
+            // العيادات النشطة مؤخراً
+            $recentClinics = Clinic::where('is_active', true)
+                ->orderBy('created_at', 'desc')
+                ->take(5)
+                ->get(['id', 'name', 'created_at', 'is_active', 'subscription_plan']);
+
+            // المواعيد القادمة
+            $upcomingAppointments = Appointment::with(['patient', 'service', 'clinic'])
+                ->whereIn('status', ['scheduled', 'confirmed'])
+                ->where('appointment_date', '>=', Carbon::today())
+                ->orderBy('appointment_date')
+                ->orderBy('start_time')
+                ->take(5)
+                ->get();
+
+            // المقالات الأخيرة
+            $recentArticles = Article::with('user')
+                ->orderBy('created_at', 'desc')
+                ->take(5)
+                ->get();
         }
-
-        // العيادات النشطة مؤخراً
-        $recentClinics = Clinic::where('is_active', true)
-            ->orderBy('created_at', 'desc')
-            ->take(5)
-            ->get(['id', 'name', 'created_at', 'is_active', 'subscription_plan']);
-
-        // المواعيد القادمة
-        $upcomingAppointments = Appointment::with(['patient', 'service', 'clinic'])
-            ->whereIn('status', ['scheduled', 'confirmed'])
-            ->where('appointment_date', '>=', Carbon::today())
-            ->orderBy('appointment_date')
-            ->orderBy('start_time')
-            ->take(5)
-            ->get();
-
-        // المقالات الأخيرة
-        $recentArticles = Article::with('user')
-            ->orderBy('created_at', 'desc')
-            ->take(5)
-            ->get();
 
         return view('dashboard.index', compact(
             'totalClinics',

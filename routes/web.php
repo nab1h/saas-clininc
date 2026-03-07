@@ -12,6 +12,7 @@ use App\Http\Controllers\Dashboard\ServiceController;
 use App\Http\Controllers\Dashboard\SettingsController;
 use App\Http\Controllers\Dashboard\UserController;
 use App\Http\Controllers\SocialAuthController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -50,7 +51,19 @@ Route::get('/book', [BookingController::class, 'create'])->name('booking.create'
 Route::post('/book', [BookingController::class, 'store'])->name('booking.store');
 Route::get('/book/success', [BookingController::class, 'success'])->name('booking.success');
 
-Route::prefix('dashboard')->name('dashboard.')->middleware([\App\Http\Middleware\LogAuth::class])->group(function () {
+Route::prefix('dashboard')->name('dashboard.')->middleware(['auth', \App\Http\Middleware\CheckUserClinic::class])->group(function () {
+    Route::post('/switch-clinic', function (Request $request) {
+        $clinicId = $request->input('clinic_id');
+        $user = Auth::user();
+
+        if ($user && $user->clinics->where('id', $clinicId)->exists()) {
+            session()->put('current_clinic_id', $clinicId);
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'غير مصرح لك بالوصول لهذه العيادة']);
+    })->name('switch.clinic');
+
     Route::get('/', [DashboardController::class, 'index'])->name('index');
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/create', [UserController::class, 'create'])->name('users.create');

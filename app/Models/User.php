@@ -47,22 +47,22 @@ class User extends Authenticatable
 
     public function appointments(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasMany(Appointment::class);
+        return $this->hasMany(\App\Models\Appointment::class);
     }
 
     public function articles(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasMany(Article::class);
+        return $this->hasMany(\App\Models\Article::class);
     }
 
     public function comments(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasMany(Comment::class);
+        return $this->hasMany(\App\Models\Comment::class);
     }
 
     public function favoriteArticles(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->belongsToMany(Article::class, 'favorite_articles')
+        return $this->belongsToMany(\App\Models\Article::class, 'favorite_articles')
             ->withTimestamps()
             ->orderBy('favorite_articles.created_at', 'desc');
     }
@@ -70,5 +70,64 @@ class User extends Authenticatable
     public function isFavoriteArticle($articleId): bool
     {
         return $this->favoriteArticles()->where('article_id', $articleId)->exists();
+    }
+
+    /**
+     * Check if user has a specific role in a clinic
+     */
+    public function hasRoleInClinic(string $roleSlug, int $clinicId): bool
+    {
+        return $this->clinics()
+            ->where('clinic_id', $clinicId)
+            ->whereHas('roles', function ($query) use ($roleSlug) {
+                $query->where('slug', $roleSlug);
+            })
+            ->exists();
+    }
+
+    /**
+     * Get user's role for a specific clinic
+     */
+    public function getRoleInClinic(int $clinicId): ?\App\Models\Role
+    {
+        $clinic = $this->clinics()->find($clinicId);
+        if (!$clinic) {
+            return null;
+        }
+
+        return \App\Models\Role::find($clinic->pivot->role_id);
+    }
+
+    /**
+     * Check if user is Super Admin (no clinics assigned or has SuperAdmin role)
+     */
+    public function isSuperAdmin(): bool
+    {
+        // Super Admin is defined as having no clinics assigned
+        return $this->clinics()->count() === 0;
+    }
+
+    /**
+     * Check if user has access to a specific clinic
+     */
+    public function hasAccessToClinic(int $clinicId): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return $this->clinics()->where('id', $clinicId)->exists();
+    }
+
+    /**
+     * Get all clinics user has access to
+     */
+    public function accessibleClinics(): \Illuminate\Database\Eloquent\Collection
+    {
+        if ($this->isSuperAdmin()) {
+            return \App\Models\Clinic::all();
+        }
+
+        return $this->clinics;
     }
 }
