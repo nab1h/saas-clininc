@@ -53,7 +53,7 @@ class DashboardController extends Controller
 
             // إحصائيات العيادات حسب الاشتراك (للسوبر أدمن فقط)
             $clinicsByPlan = collect();
-            $recentClinics = collect();
+            $recentClinics = collect(); // العيادات النشطة مؤخراً (غير مستخدم في عيادة واحدة)
 
             // نمو المواعيد
             $thisMonthAppointments = $currentClinic->appointments()
@@ -105,6 +105,11 @@ class DashboardController extends Controller
             $totalArticles = Article::count();
             $totalInvoices = Invoice::count();
             $totalAppointments = Appointment::count();
+
+            // نمو المواعيد (قيم افتراضية للأدمن)
+            $thisMonthAppointments = 0;
+            $lastMonthAppointments = 0;
+            $appointmentsGrowth = 0;
 
             // إحصائيات المواعيد
             $pendingAppointments = Appointment::where('status', 'scheduled')->count();

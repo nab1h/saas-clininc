@@ -3,132 +3,281 @@
 @section('title', 'إعدادات العيادة')
 
 @section('content')
-    <h1 class="mb-4">إعدادات العيادة</h1>
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4">
+        <div class="d-block mb-4 mb-md-0">
+            <h1 class="h4 mb-0">الإعدادات</h1>
+            <nav class="d-none d-md-inline-block" aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ route('dashboard.index') }}">الرئيسية</a></li>
+                    <li class="breadcrumb-item active">الإعدادات</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
 
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
             {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
+
     @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
             {{ session('error') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
+
     @if($errors->any())
-        <div class="alert alert-danger alert-dismissible fade show">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <ul class="mb-0">
-                @foreach($errors->all() as $e)
-                    <li>{{ $e }}</li>
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
                 @endforeach
             </ul>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
 
-    <form action="{{ route('dashboard.settings.update') }}" method="post" enctype="multipart/form-data">
-        @csrf
-        @method('put')
+    <div class="row">
+        <!-- معلومات العيادة -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-building me-2"></i>
+                        معلومات العيادة
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('dashboard.settings.update') }}" method="POST" id="basic-info-form">
+                        @csrf
 
-        @php
-            $settings = $clinic->settings ?? [];
-        @endphp
+                        <div class="mb-3">
+                            <label for="name" class="form-label">اسم العيادة <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name"
+                                   value="{{ old('name', $clinic->name) }}" required>
+                            @error('name')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
 
-        <div class="card mb-4">
-            <div class="card-header">الاسم واللوجو</div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-8 mb-3">
-                        <label class="form-label">اسم العيادة <span class="text-danger">*</span></label>
-                        <input type="text" name="name" class="form-control" value="{{ old('name', $clinic->name) }}" required>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">لوجو العيادة</label>
-                        @if($clinic->logo)
-                            <div class="mb-2">
-                                <img src="{{ asset('storage/' . $clinic->logo) }}" alt="لوجو" class="img-thumbnail" style="max-height: 80px;">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">البريد الإلكتروني</label>
+                            <input type="email" class="form-control" id="email" name="email"
+                                   value="{{ old('email', $clinic->email) }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">رقم الهاتف</label>
+                            <input type="text" class="form-control" id="phone" name="phone"
+                                   value="{{ old('phone', $clinic->phone) }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="address" class="form-label">العنوان</label>
+                            <textarea class="form-control" id="address" name="address" rows="2">{{ old('address', $clinic->address) }}</textarea>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" formaction="{{ route('dashboard.settings.update') }}" class="btn btn-primary w-100">
+                                <i class="fas fa-save me-2"></i>
+                                حفظ المعلومات
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- اللوجو والأيقونات -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-image me-2"></i>
+                        اللوجو والأيقونات
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('dashboard.settings.update') }}" method="POST" id="icons-form" enctype="multipart/form-data">
+                        @csrf
+
+                        <div class="mb-3">
+                            <label for="logo" class="form-label">شعار العيادة (Logo)</label>
+                            @if($clinic->logo)
+                                <div class="mb-2 d-flex align-items-center gap-3">
+                                    <img src="{{ asset('storage/' . $clinic->logo) }}" alt="Logo" class="img-thumbnail" style="max-height: 80px;">
+                                    <a href="javascript:void(0)" onclick="document.getElementById('remove_logo').value='1'; document.getElementById('icons-form').submit();" class="text-danger btn-sm">
+                                        <i class="fas fa-trash"></i> حذف
+                                    </a>
+                                </div>
+                            @endif
+                            <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
+                            <input type="hidden" name="remove_logo" id="remove_logo" value="0">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Favicon (أيقونة المتصفح)</label>
+                            @if($clinic->settings['favicon'] ?? null)
+                                <div class="mb-2 d-flex align-items-center gap-3">
+                                    <img src="{{ asset('storage/' . $clinic->settings['favicon']) }}" alt="Favicon" class="img-thumbnail" style="width: 32px; height: 32px;">
+                                    <a href="javascript:void(0)" onclick="document.getElementById('remove_favicon').value='1'; document.getElementById('icons-form').submit();" class="text-danger btn-sm">
+                                        <i class="fas fa-trash"></i> حذف
+                                    </a>
+                                </div>
+                            @endif
+                            <input type="file" class="form-control" id="favicon" name="favicon" accept=".ico,.png,.jpg,.jpeg">
+                            <input type="hidden" name="remove_favicon" id="remove_favicon" value="0">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">أيقونة 16×16</label>
+                            @if($clinic->settings['icon_16'] ?? null)
+                                <div class="mb-2 d-flex align-items-center gap-3">
+                                    <img src="{{ asset('storage/' . $clinic->settings['icon_16']) }}" alt="Icon 16x16" class="img-thumbnail" style="width: 16px; height: 16px;">
+                                    <a href="javascript:void(0)" onclick="document.getElementById('remove_icon_16').value='1'; document.getElementById('icons-form').submit();" class="text-danger btn-sm">
+                                        <i class="fas fa-trash"></i> حذف
+                                    </a>
+                                </div>
+                            @endif
+                            <input type="file" class="form-control" id="icon_16" name="icon_16" accept="image/*">
+                            <input type="hidden" name="remove_icon_16" id="remove_icon_16" value="0">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">أيقونة 32×32</label>
+                            @if($clinic->settings['icon_32'] ?? null)
+                                <div class="mb-2 d-flex align-items-center gap-3">
+                                    <img src="{{ asset('storage/' . $clinic->settings['icon_32']) }}" alt="Icon 32x32" class="img-thumbnail" style="width: 32px; height: 32px;">
+                                    <a href="javascript:void(0)" onclick="document.getElementById('remove_icon_32').value='1'; document.getElementById('icons-form').submit();" class="text-danger btn-sm">
+                                        <i class="fas fa-trash"></i> حذف
+                                    </a>
+                                </div>
+                            @endif
+                            <input type="file" class="form-control" id="icon_32" name="icon_32" accept="image/*">
+                            <input type="hidden" name="remove_icon_32" id="remove_icon_32" value="0">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">أيقونة 48×48</label>
+                            @if($clinic->settings['icon_48'] ?? null)
+                                <div class="mb-2 d-flex align-items-center gap-3">
+                                    <img src="{{ asset('storage/' . $clinic->settings['icon_48']) }}" alt="Icon 48x48" class="img-thumbnail" style="width: 48px; height: 48px;">
+                                    <a href="javascript:void(0)" onclick="document.getElementById('remove_icon_48').value='1'; document.getElementById('icons-form').submit();" class="text-danger btn-sm">
+                                        <i class="fas fa-trash"></i> حذف
+                                    </a>
+                                </div>
+                            @endif
+                            <input type="file" class="form-control" id="icon_48" name="icon_48" accept="image/*">
+                            <input type="hidden" name="remove_icon_48" id="remove_icon_48" value="0">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">أيقونة 180×180 (iPhone/iPad)</label>
+                            @if($clinic->settings['icon_180'] ?? null)
+                                <div class="mb-2 d-flex align-items-center gap-3">
+                                    <img src="{{ asset('storage/' . $clinic->settings['icon_180']) }}" alt="Icon 180x180" class="img-thumbnail" style="width: 60px; height: 60px;">
+                                    <a href="javascript:void(0)" onclick="document.getElementById('remove_icon_180').value='1'; document.getElementById('icons-form').submit();" class="text-danger btn-sm">
+                                        <i class="fas fa-trash"></i> حذف
+                                    </a>
+                                </div>
+                            @endif
+                            <input type="file" class="form-control" id="icon_180" name="icon_180" accept="image/*">
+                            <input type="hidden" name="remove_icon_180" id="remove_icon_180" value="0">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">أيقونة 192×192 (Android)</label>
+                            @if($clinic->settings['icon_192'] ?? null)
+                                <div class="mb-2 d-flex align-items-center gap-3">
+                                    <img src="{{ asset('storage/' . $clinic->settings['icon_192']) }}" alt="Icon 192x192" class="img-thumbnail" style="width: 48px; height: 48px;">
+                                    <a href="javascript:void(0)" onclick="document.getElementById('remove_icon_192').value='1'; document.getElementById('icons-form').submit();" class="text-danger btn-sm">
+                                        <i class="fas fa-trash"></i> حذف
+                                    </a>
+                                </div>
+                            @endif
+                            <input type="file" class="form-control" id="icon_192" name="icon_192" accept="image/*">
+                            <input type="hidden" name="remove_icon_192" id="remove_icon_192" value="0">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">أيقونة 512×512 (Windows)</label>
+                            @if($clinic->settings['icon_512'] ?? null)
+                                <div class="mb-2 d-flex align-items-center gap-3">
+                                    <img src="{{ asset('storage/' . $clinic->settings['icon_512']) }}" alt="Icon 512x512" class="img-thumbnail" style="width: 48px; height: 48px;">
+                                    <a href="javascript:void(0)" onclick="document.getElementById('remove_icon_512').value='1'; document.getElementById('icons-form').submit();" class="text-danger btn-sm">
+                                        <i class="fas fa-trash"></i> حذف
+                                    </a>
+                                </div>
+                            @endif
+                            <input type="file" class="form-control" id="icon_512" name="icon_512" accept="image/*">
+                            <input type="hidden" name="remove_icon_512" id="remove_icon_512" value="0">
+                        </div>
+
+                        <div class="mt-3">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-save me-2"></i>
+                                حفظ الأيقونات
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- معلومات الإعدادات -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-file-alt me-2"></i>
+                        معلومات الإعدادات
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('dashboard.settings.update') }}" method="POST" id="settings-form" enctype="multipart/form-data">
+                        @csrf
+
+                        <div class="mb-3">
+                            <label for="content" class="form-label">المحتوى</label>
+                            <textarea class="form-control" id="content" name="content" rows="4" placeholder="محتوى صفحة الترحيب أو تعليمات عامة">{{ old('content', $clinic->settings['content'] ?? '') }}</textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="message" class="form-label">رسالة الترحيب</label>
+                            <textarea class="form-control" id="message" name="message" rows="3" placeholder="رسالة ترحيب في صفحة الداشبورد">{{ old('message', $clinic->settings['message'] ?? '') }}</textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="footer_text" class="form-label">نص الفوتر</label>
+                            <textarea class="form-control" id="footer_text" name="footer_text" rows="3" placeholder="نص يظهر في أسفل جميع الصفحات">{{ old('footer_text', $clinic->settings['footer_text'] ?? '') }}</textarea>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-3">
+                                <label for="brand_color" class="form-label">اللون التجاري</label>
+                                <input type="color" class="form-control form-control-color" id="brand_color" name="brand_color"
+                                       value="{{ old('brand_color', $clinic->settings['brand_color'] ?? '#667eea') }}">
                             </div>
-                        @endif
-                        <input type="file" name="logo" class="form-control" accept="image/*">
-                    </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="primary_color" class="form-label">اللون الأساسي</label>
+                                <input type="color" class="form-control form-control-color" id="primary_color" name="primary_color"
+                                       value="{{ old('primary_color', $clinic->settings['primary_color'] ?? '#764ba2') }}">
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-save me-2"></i>
+                                حفظ الإعدادات
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
-
-        <div class="card mb-4">
-            <div class="card-header">المحتويات ورسالة العيادة</div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label class="form-label">المحتويات / الوصف</label>
-                    <textarea name="content" class="form-control" rows="4" placeholder="نص تعريفي أو محتوى الصفحة الرئيسية">{{ old('content', $settings['content'] ?? '') }}</textarea>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">رسالة العيادة</label>
-                    <textarea name="message" class="form-control" rows="3" placeholder="رسالة ترحيب أو تنبيه للزوار">{{ old('message', $settings['message'] ?? '') }}</textarea>
-                </div>
-            </div>
-        </div>
-
-        <div class="card mb-4">
-            <div class="card-header">أيقونات التاب (Favicon) بجميع الأحجام</div>
-            <div class="card-body">
-                <p class="text-muted small">رفع أيقونات تظهر بجانب عنوان الصفحة في المتصفح. الأحجام الشائعة: 16×16، 32×32، 48×48، 180×180 (آبل)، 192×192، 512×512.</p>
-                <div class="row g-3">
-                    <div class="col-md-6 col-lg-4">
-                        <label class="form-label">Favicon (32×32)</label>
-                        @if(!empty($settings['favicon']))
-                            <div class="mb-1"><img src="{{ asset('storage/' . $settings['favicon']) }}" alt="" style="width:32px;height:32px;object-fit:contain;"></div>
-                        @endif
-                        <input type="file" name="favicon" class="form-control form-control-sm" accept=".ico,.png,.jpg,.jpeg">
-                    </div>
-                    <div class="col-md-6 col-lg-4">
-                        <label class="form-label">16×16</label>
-                        @if(!empty($settings['icon_16']))
-                            <div class="mb-1"><img src="{{ asset('storage/' . $settings['icon_16']) }}" alt="" style="width:16px;height:16px;object-fit:contain;"></div>
-                        @endif
-                        <input type="file" name="icon_16" class="form-control form-control-sm" accept="image/*">
-                    </div>
-                    <div class="col-md-6 col-lg-4">
-                        <label class="form-label">32×32</label>
-                        @if(!empty($settings['icon_32']))
-                            <div class="mb-1"><img src="{{ asset('storage/' . $settings['icon_32']) }}" alt="" style="width:32px;height:32px;object-fit:contain;"></div>
-                        @endif
-                        <input type="file" name="icon_32" class="form-control form-control-sm" accept="image/*">
-                    </div>
-                    <div class="col-md-6 col-lg-4">
-                        <label class="form-label">48×48</label>
-                        @if(!empty($settings['icon_48']))
-                            <div class="mb-1"><img src="{{ asset('storage/' . $settings['icon_48']) }}" alt="" style="width:48px;height:48px;object-fit:contain;"></div>
-                        @endif
-                        <input type="file" name="icon_48" class="form-control form-control-sm" accept="image/*">
-                    </div>
-                    <div class="col-md-6 col-lg-4">
-                        <label class="form-label">180×180 (Apple Touch)</label>
-                        @if(!empty($settings['icon_180']))
-                            <div class="mb-1"><img src="{{ asset('storage/' . $settings['icon_180']) }}" alt="" style="width:60px;height:60px;object-fit:contain;"></div>
-                        @endif
-                        <input type="file" name="icon_180" class="form-control form-control-sm" accept="image/*">
-                    </div>
-                    <div class="col-md-6 col-lg-4">
-                        <label class="form-label">192×192</label>
-                        @if(!empty($settings['icon_192']))
-                            <div class="mb-1"><img src="{{ asset('storage/' . $settings['icon_192']) }}" alt="" style="width:48px;height:48px;object-fit:contain;"></div>
-                        @endif
-                        <input type="file" name="icon_192" class="form-control form-control-sm" accept="image/*">
-                    </div>
-                    <div class="col-md-6 col-lg-4">
-                        <label class="form-label">512×512</label>
-                        @if(!empty($settings['icon_512']))
-                            <div class="mb-1"><img src="{{ asset('storage/' . $settings['icon_512']) }}" alt="" style="width:48px;height:48px;object-fit:contain;"></div>
-                        @endif
-                        <input type="file" name="icon_512" class="form-control form-control-sm" accept="image/*">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <button type="submit" class="btn btn-primary">حفظ الإعدادات</button>
-    </form>
+    </div>
 @endsection
