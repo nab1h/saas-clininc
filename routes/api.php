@@ -16,7 +16,29 @@ Route::get('/user', function (Request $request) {
 
 Route::get('/{slug}/articles', function ($slug) {
     $clinic = Clinic::where('slug', $slug)->firstOrFail();
-    return Article::where('clinic_id', $clinic->id)->get();
+    $articles = Article::where('clinic_id', $clinic->id)->get();
+
+    // Load comments for each article
+    $articleIds = $articles->pluck('id');
+    $comments = Comment::whereIn('article_id', $articleIds)->get()->groupBy('article_id');
+
+    return $articles->map(function ($article) use ($comments) {
+        $articleComments = $comments->get($article->id) ?? collect();
+        return [
+            'id' => $article->id,
+            'title' => $article->title,
+            'slug' => $article->slug,
+            'body' => $article->body,
+            'excerpt' => $article->excerpt ?? null,
+            'featured_image' => $article->featured_image ?? null,
+            'is_published' => $article->is_published,
+            'is_favorite' => $article->is_favorite ?? false,
+            'created_at' => $article->created_at,
+            'updated_at' => $article->updated_at,
+            'comment_count' => $articleComments->count(),
+            'comments' => $articleComments->values(),
+        ];
+    });
 });
 
 Route::get('/{slug}/links', function ($slug) {
@@ -54,32 +76,6 @@ Route::get('/{slug}/comments', function ($slug) {
     return Comment::whereIn('article_id', $articleIds)->get();
 });
 
-Route::get('/clinics/{clinic}/users', function (Clinic $clinic) {
-    return response()->json([
-        'users' => $clinic->users->map(function ($user) {
-            return [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role_name' => $user->pivot->role_id ? Role::find($user->pivot->role_id)?->name : 'بدون دور',
-            ];
-        }),
-    ]);
-});
-
-Route::get('/users/{userId}/clinics', function ($userId) {
-    $user = User::findOrFail($userId);
-    return response()->json([
-        'clinics' => $user->clinics->map(function ($clinic) {
-            return [
-                'clinic_id' => $clinic->id,
-                'name' => $clinic->name,
-                'role_name' => $clinic->pivot->role_id ? Role::find($clinic->pivot->role_id)?->name : 'بدون دور',
-            ];
-        }),
-    ]);
-});
-
 Route::post('/{slug}/comments', function (Request $request, $slug) {
     $clinic = Clinic::where('slug', $slug)->firstOrFail();
 
@@ -90,6 +86,29 @@ Route::post('/{slug}/comments', function (Request $request, $slug) {
         'parent_id' => 'nullable|exists:comments,id',
         'guest_email' => 'nullable|email|max:255',
     ]);
+
+    // Verify that the article belongs to this clinic
+    $article = Article::where('id', $validated['article_id'])
+        ->where('clinic_id', $clinic->id)
+        ->first();
+
+    if (!$article) {
+        return response()->json([
+            'message' => 'المقال غير موجود أو لا ينتمي لهذه العيادة',
+        ], 404);
+    }
+
+    // Verify parent comment belongs to the same clinic's article
+    if (!empty($validated['parent_id'])) {
+        $parentComment = Comment::find($validated['parent_id']);
+        $parentArticle = $parentComment ? Article::find($parentComment->article_id) : null;
+
+        if (!$parentArticle || $parentArticle->clinic_id !== $clinic->id) {
+            return response()->json([
+                'message' => 'التعليق الأصل غير صحيح',
+            ], 404);
+        }
+    }
 
     $comment = Comment::create([
         'article_id' => $validated['article_id'],
@@ -102,8 +121,7 @@ Route::post('/{slug}/comments', function (Request $request, $slug) {
     ]);
 
     return response()->json([
-        'message' => 'done',
+        'message' => 'تم إضافة التعليق بنجاح',
         'comment' => $comment,
     ], 201);
 });
-
