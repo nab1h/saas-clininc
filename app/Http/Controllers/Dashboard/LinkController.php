@@ -13,8 +13,19 @@ class LinkController extends Controller
 {
     public function index(): View
     {
-        $clinic = Clinic::where('is_active', true)->first() ?? Clinic::first();
-        $links = Link::when($clinic, fn ($q) => $q->where('clinic_id', $clinic->id))
+        // Get current clinic from session (set by CheckUserClinic middleware)
+        $currentClinicId = session('current_clinic_id');
+        if (!$currentClinicId) {
+            return redirect()->route('dashboard.index')->with('error', 'لا توجد عيادة محددة.');
+        }
+
+        $clinic = Clinic::find($currentClinicId);
+        if (!$clinic) {
+            return redirect()->route('dashboard.index')->with('error', 'العيادة غير موجودة.');
+        }
+
+        // Show links ONLY for current logged-in clinic (not all clinics)
+        $links = Link::where('clinic_id', $currentClinicId)
             ->orderBy('order')
             ->orderBy('id')
             ->get();
