@@ -6,6 +6,7 @@ use App\Models\Article;
 use App\Models\Link;
 use App\Models\Service;
 use App\Models\Comment;
+use App\Models\Patient;
 use App\Models\Clinic;
 use App\Models\User;
 use App\Models\Role;
@@ -125,3 +126,206 @@ Route::post('/{slug}/comments', function (Request $request, $slug) {
         'comment' => $comment,
     ], 201);
 });
+
+// Get available services for booking
+Route::get('/{slug}/booking/services', function ($slug) {
+    $clinic = Clinic::where('slug', $slug)->firstOrFail();
+    $services = Service::where('clinic_id', $clinic->id)
+        ->where('is_active', true)
+        ->get(['id', 'name', 'description', 'duration_minutes', 'price']);
+
+    return response()->json([
+        'clinic' => [
+            'id' => $clinic->id,
+            'name' => $clinic->name,
+            'slug' => $clinic->slug,
+        ],
+        'services' => $services,
+    ]);
+});
+
+// Get available time slots for booking
+Route::get('/{slug}/booking/slots', function (Request $request, $slug) {
+    $clinic = Clinic::where('slug', $slug)->firstOrFail();
+
+    $validated = $request->validate([
+        'date' => 'required|date',
+        'service_id' => 'nullable|exists:services,id',
+    ]);
+
+    $date = \Carbon\Carbon::parse($validated['date']);
+
+    // Get existing appointments for this date
+    $query = \App\Models\Appointment::where('clinic_id', $clinic->id)
+        ->where('appointment_date', $date->format('Y-m-d'))
+        ->whereIn('status', ['scheduled', 'confirmed']);
+
+    if ($validated['service_id'] ?? null) {
+        $service = Service::find($validated['service_id']);
+        if ($service) {
+            $query->where('service_id', $service->id);
+        }
+    }
+
+    $existingAppointments = $query->get();
+
+    // Generate time slots (every 30 minutes from 9 AM to 5 PM)
+    $slots = [];
+    $startTime = \Carbon\Carbon::parse($date->format('Y-m-d') . ' 09:00:00');
+    $endTime = \Carbon\Carbon::parse($date->format('Y-m-d') . ' 17:00:00');
+
+    while ($startTime < $endTime) {
+        $slotEnd = $startTime->copy()->addMinutes(30);
+
+        // Check if this slot is available
+        $isAvailable = true;
+        foreach ($existingAppointments as $appointment) {
+            $appointmentStart = \Carbon\Carbon::parse($appointment->appointment_date . ' ' . $appointment->start_time);
+            $appointmentEnd = $appointmentStart->copy()->addMinutes(30);
+
+            // Check overlap
+            if (($startTime >= $appointmentStart && $startTime < $appointmentEnd) ||
+                ($slotEnd > $appointmentStart && $slotEnd <= $appointmentEnd)) {
+                $isAvailable = false;
+                break;
+            }
+        }
+
+        $slots[] = [
+            'time' => $startTime->format('H:i'),
+            'available' => $isAvailable,
+            'start' => $startTime->toIso8601String(),
+            'end' => $slotEnd->toIso8601String(),
+        ];
+
+        $startTime = $slotEnd;
+    }
+
+    return response()->json([
+        'date' => $date->format('Y-m-d'),
+        'slots' => $slots,
+        'available_count' => count(array_filter($slots, fn($s) => $s['available'])),
+    ]);
+});
+
+// Create new booking/appointment
+Route::post('/{slug}/booking', function (Request $request, $slug) {
+    $clinic = Clinic::where('slug', $slug)->firstOrFail();
+
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'phone' => 'required|string|max:50',
+        'email' => 'nullable|email|max:255',
+        'appointment_date' => 'required|date|after_or_equal:today',
+        'start_time' => 'required|string|max:10',
+        'service_id' => 'nullable|exists:services,id',
+        'notes' => 'nullable|string|max:1000',
+    ], [
+        'name.required' => 'الاسم مطلوب.',
+        'phone.required' => 'رقم الهاتف مطلوب.',
+        'appointment_date.required' => 'تاريخ الموعد مطلوب.',
+        'appointment_date.after_or_equal' => 'التاريخ يجب أن يكون اليوم أو بعده.',
+        'start_time.required' => 'وقت الموعد مطلوب.',
+        'phone.regex' => 'رقم الهاتف غير صحيح.',
+    ]);
+
+    // Verify service belongs to this clinic
+    if ($validated['service_id'] ?? null) {
+        $service = Service::where('id', $validated['service_id'])
+            ->where('clinic_id', $clinic->id)
+            ->first();
+
+        if (!$service) {
+            return response()->json([
+                'message' => 'الخدمة غير موجودة أو لا تنتمي لهذه العيادة',
+            ], 404);
+        }
+    }
+
+    // Check if time slot is available
+    $appointmentDateTime = \Carbon\Carbon::parse($validated['appointment_date'] . ' ' . $validated['start_time']);
+    $existingAppointment = \App\Models\Appointment::where('clinic_id', $clinic->id)
+        ->where('appointment_date', $validated['appointment_date'])
+        ->where('start_time', $validated['start_time'])
+        ->whereIn('status', ['scheduled', 'confirmed'])
+        ->first();
+
+    if ($existingAppointment) {
+        return response()->json([
+            'message' => 'هذا الموعد محجوز بالفعل. اختر وقت آخر.',
+        ], 400);
+    }
+
+    // Create or update patient
+    $patient = Patient::firstOrCreate(
+        [
+            'clinic_id' => $clinic->id,
+            'phone' => $validated['phone'],
+        ],
+        [
+            'name' => $validated['name'],
+            'email' => $validated['email'] ?? null,
+            'is_active' => true,
+        ]
+    );
+
+    if ($patient->wasRecentlyCreated === false) {
+        $patient->update([
+            'name' => $validated['name'],
+            'email' => $validated['email'] ?? $patient->email,
+        ]);
+    }
+
+    // Create appointment
+    \Illuminate\Support\Facades\Log::info('Creating appointment', [
+        'clinic_id' => $clinic->id,
+        'clinic_name' => $clinic->name,
+        'phone' => $validated['phone'],
+        'name' => $validated['name'],
+        'email' => $validated['email'] ?? null,
+        'appointment_date' => $validated['appointment_date'],
+        'start_time' => $validated['start_time'],
+        'service_id' => $validated['service_id'] ?? null,
+        'notes' => $validated['notes'] ?? null,
+    ]);
+
+    $appointment = \App\Models\Appointment::create([
+        'clinic_id' => $clinic->id,
+        'patient_id' => $patient->id,
+        'appointment_date' => $validated['appointment_date'],
+        'start_time' => $validated['start_time'],
+        'service_id' => $validated['service_id'] ?? null,
+        'status' => 'scheduled',
+        'notes' => $validated['notes'] ?? null,
+    ]);
+
+    \Illuminate\Support\Facades\Log::info('Appointment created successfully', [
+        'appointment_id' => $appointment->id,
+        'clinic_id' => $appointment->clinic_id,
+        'patient_id' => $appointment->patient_id,
+        'appointment_date' => $appointment->appointment_date,
+        'start_time' => $appointment->start_time,
+        'service_id' => $appointment->service_id,
+        'status' => $appointment->status,
+        'notes' => $appointment->notes,
+    ]);
+
+    return response()->json([
+        'message' => 'تم تسجيل الحجز بنجاح',
+        'clinic_id' => $clinic->id,
+        'clinic_name' => $clinic->name,
+        'clinic_slug' => $clinic->slug,
+        'appointment' => [
+            'id' => $appointment->id,
+            'appointment_date' => $appointment->appointment_date,
+            'start_time' => $appointment->start_time,
+            'status' => $appointment->status,
+        ],
+        'patient' => [
+            'id' => $patient->id,
+            'name' => $patient->name,
+            'phone' => $patient->phone,
+        ],
+    ], 201);
+});
+

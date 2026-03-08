@@ -89,59 +89,50 @@
                             <div class="sb-sidenav-menu-heading">Core</div>
                             <a class="nav-link" href="{{ route('dashboard.index') }}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                                Dashboard
+                                لوحة التحكم
                             </a>
 
                             @if(auth()->user()->isSuperAdmin() || auth()->user()->getRoleInClinic($currentClinicId ?? 0)?->slug === 'owner')
                             <a class="nav-link" href="{{ route('dashboard.users.index') }}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
-                                Users
+                                المستخدمين
                             </a>
                             @endif
 
                             @if(auth()->user()->isSuperAdmin())
                             <a class="nav-link" href="{{ route('dashboard.clinics.index') }}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-hospital"></i></div>
-                                Clinics
+                                العيادات
                             </a>
                             @endif
 
-                            <a class="nav-link" href="{{ route('dashboard.patients.index') }}">
-                                <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                                Patients
-                            </a>
-
-                            <a class="nav-link" href="{{ route('dashboard.appointments.index') }}">
-                                <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                                Appointments
-                            </a>
-
                             <a class="nav-link" href="{{ route('dashboard.services.index') }}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                                Services
+                                خدماتي
                             </a>
 
-                            <a class="nav-link" href="{{ route('dashboard.invoices.index') }}">
+                            <a class="nav-link" href="{{ route('dashboard.booking.index') }}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                                Invoices
+                                الحجوزات
                             </a>
 
                             <a class="nav-link" href="{{ route('dashboard.articles.index') }}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                                Articles
+                                مقالاتي
                             </a>
 
                             <a class="nav-link" href="{{ route('dashboard.links.index') }}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                                Links
+                                الروابط
                             </a>
 
                             <a class="nav-link" href="{{ route('dashboard.settings.index') }}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                                Settings
+                                اعدادات الموقع العامة
                             </a>
+                            
 
-                            <div class="sb-sidenav-menu-heading">Interface</div>
+                            <!-- <div class="sb-sidenav-menu-heading">Interface</div>
                             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
                                 <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
                                 Layouts
@@ -194,7 +185,7 @@
                                 <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
                                 Tables
                             </a>
-                        </div>
+                        </div> -->
                     </div>
                     <div class="sb-sidenav-footer">
                         <div class="small">Logged in as:</div>

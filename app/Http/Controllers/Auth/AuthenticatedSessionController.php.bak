@@ -24,36 +24,13 @@ class AuthenticatedSessionController extends Controller
             if (Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
                 $request->session()->regenerate();
 
-                // Get the current user
-                $user = Auth::user();
+                \Log::info('Login successful', ['email' => $request->email]);
 
-                // Get the user's clinics with pivot data
-                $userClinics = $user->clinics()->withPivot(['role_id'])->get();
-
-                // Find the first active clinic or the one marked as default
-                $firstClinic = null;
-                foreach ($userClinics as $clinic) {
-                    if ($clinic->is_active && $clinic->pivot->is_default) {
-                        $firstClinic = $clinic;
-                        break;
-                    }
-                }
-
-                // If no default clinic, get the first active one
-                if (!$firstClinic) {
-                    $firstClinic = $userClinics->where('is_active', true)->first();
-                }
-
-                // Set current clinic in session
-                if ($firstClinic) {
-                    session()->put('current_clinic_id', $firstClinic->id);
-                }
-
-                \Log::info('Login successful', ['email' => $request->email, 'clinic_id' => $firstClinic ? $firstClinic->id : null]);
                 return redirect()->intended('/dashboard');
             }
 
             \Log::info('Login failed', ['email' => $request->email]);
+
             return back()->with('error', 'بيانات الاعتماد المقدمة غير صحيحة.')->onlyInput('email');
         } catch (\Exception $e) {
             \Log::error('Login error', ['message' => $e->getMessage()]);
@@ -64,8 +41,11 @@ class AuthenticatedSessionController extends Controller
     public function destroy(Request $request)
     {
         Auth::guard('web')->logout();
+
         $request->session()->invalidate();
+
         $request->session()->regenerateToken();
+
         return redirect('/')->with('success', 'تم تسجيل الخروج بنجاح!');
     }
 }

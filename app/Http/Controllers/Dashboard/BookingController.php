@@ -13,10 +13,20 @@ class BookingController extends Controller
 {
     public function index(Request $request): View
     {
-        $clinic = Clinic::where('is_active', true)->first() ?? Clinic::first();
+        // Get current clinic from session (set by CheckUserClinic middleware)
+        $currentClinicId = session('current_clinic_id');
+        if (!$currentClinicId) {
+            return redirect()->route('dashboard.index')->with('error', 'لا توجد عيادة محددة.');
+        }
 
-        $query = Appointment::with(['patient', 'service'])
-            ->when($clinic, fn ($q) => $q->where('clinic_id', $clinic->id))
+        $clinic = Clinic::find($currentClinicId);
+        if (!$clinic) {
+            return redirect()->route('dashboard.index')->with('error', 'العيادة غير موجودة.');
+        }
+
+        // Show appointments ONLY for current logged-in clinic (not all clinics)
+        $query = Appointment::with(['patient', 'service', 'clinic'])
+            ->where('clinic_id', $currentClinicId)
             ->orderBy('appointment_date', 'desc')
             ->orderBy('start_time', 'desc');
 
@@ -37,7 +47,13 @@ class BookingController extends Controller
 
     public function show(Appointment $appointment): View
     {
-        $appointment->load(['patient', 'service', 'clinic']);
+        // Verify appointment belongs to current clinic
+        $currentClinicId = session('current_clinic_id');
+        if ($currentClinicId && $appointment->clinic_id !== $currentClinicId) {
+            return redirect()->route('dashboard.booking.index')->with('error', 'غير مصرح لك بالوصول لهذا الموعد.');
+        }
+
+        $appointment->load(['patient', 'service']);
         return view('dashboard.booking.show', ['booking' => $appointment]);
     }
 
