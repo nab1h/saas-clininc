@@ -113,9 +113,14 @@ Route::prefix('dashboard')->name('dashboard.')->middleware(['auth', \App\Http\Mi
     Route::get('/scripts/{script}/edit', [ScriptController::class, 'edit'])->name('scripts.edit');
     Route::put('/scripts/{script}', [ScriptController::class, 'update'])->name('scripts.update');
     Route::delete('/scripts/{script}', [ScriptController::class, 'destroy'])->name('scripts.destroy');
+    Route::get('/doctors', [DoctorsController::class, 'index'])->name('doctors.index');
+    Route::get('/doctors/create', [DoctorsController::class, 'create'])->name('doctors.create');
+    Route::post('/doctors', [DoctorsController::class, 'store'])->name('doctors.store');
+    Route::get('/doctors/{doctor}/edit', [DoctorsController::class, 'edit'])->name('doctors.edit');
+    Route::put('/doctors/{doctor}', [DoctorsController::class, 'update'])->name('doctors.update');
+    Route::delete('/doctors/{doctor}', [DoctorsController::class, 'destroy'])->name('doctors.destroy');
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
-    Route::resource('doctors', DoctorsController::class);
     Route::get('/booking', [\App\Http\Controllers\Dashboard\BookingController::class, 'index'])->name('booking.index');
     Route::get('/booking/{appointment}', [\App\Http\Controllers\Dashboard\BookingController::class, 'show'])->name('booking.show');
     Route::patch('/booking/{appointment}/status', [\App\Http\Controllers\Dashboard\BookingController::class, 'updateStatus'])->name('booking.updateStatus');
