@@ -8,6 +8,7 @@ use App\Models\Service;
 use App\Models\Comment;
 use App\Models\Patient;
 use App\Models\Clinic;
+use App\Models\Script;
 use App\Models\User;
 use App\Models\Role;
 
@@ -45,6 +46,11 @@ Route::get('/{slug}/articles', function ($slug) {
 Route::get('/{slug}/links', function ($slug) {
     $clinic = Clinic::where('slug', $slug)->firstOrFail();
     return Link::where('clinic_id', $clinic->id)->get();
+});
+
+Route::get('/{slug}/scripts', function ($slug) {
+    $clinic = Clinic::where('slug', $slug)->firstOrFail();
+    return Script::where('clinic_id', $clinic->id)->get();
 });
 
 Route::get('/{slug}/services', function ($slug) {

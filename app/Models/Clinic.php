@@ -119,4 +119,14 @@ class Clinic extends Model
     {
         return $this->hasMany(Link::class)->orderBy('order');
     }
+
+    public function scripts(): HasMany
+    {
+        return $this->hasMany(Script::class)->orderBy('order');
+    }
+
+    public function doctors()
+    {
+        return $this->hasMany(Doctor::class);
+    }
 }

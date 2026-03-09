@@ -126,6 +126,16 @@
                                 الروابط
                             </a>
 
+                            <a class="nav-link" href="{{ route('dashboard.scripts.index') }}">
+                                <div class="sb-nav-link-icon"><i class="fas fa-code"></i></div>
+                                السكريبتات
+                            </a>
+
+                            <a class="nav-link" href="{{ route('dashboard.doctors.index') }}">
+                                <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                                الأطباء
+                            </a>
+                            
                             <a class="nav-link" href="{{ route('dashboard.settings.index') }}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                                 اعدادات الموقع العامة

@@ -35,18 +35,30 @@ class LinkController extends Controller
 
     public function create(): View|RedirectResponse
     {
-        $clinic = Clinic::where('is_active', true)->first() ?? Clinic::first();
+        // Get current clinic from session (set by CheckUserClinic middleware)
+        $currentClinicId = session('current_clinic_id');
+        if (!$currentClinicId) {
+            return redirect()->route('dashboard.index')->with('error', 'لا توجد عيادة محددة.');
+        }
+
+        $clinic = Clinic::find($currentClinicId);
         if (! $clinic) {
-            return redirect()->route('dashboard.links.index')->with('error', 'لا توجد عيادة. أضف عيادة أولاً.');
+            return redirect()->route('dashboard.links.index')->with('error', 'العيادة غير موجودة.');
         }
         return view('dashboard.links.form', ['link' => null, 'clinic' => $clinic]);
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $clinic = Clinic::where('is_active', true)->first() ?? Clinic::first();
+        // Get current clinic from session (set by CheckUserClinic middleware)
+        $currentClinicId = session('current_clinic_id');
+        if (!$currentClinicId) {
+            return redirect()->route('dashboard.index')->with('error', 'لا توجد عيادة محددة.');
+        }
+
+        $clinic = Clinic::find($currentClinicId);
         if (! $clinic) {
-            return redirect()->route('dashboard.links.index')->with('error', 'لا توجد عيادة.');
+            return redirect()->route('dashboard.links.index')->with('error', 'العيادة غير موجودة.');
         }
 
         $validated = $request->validate([
@@ -71,12 +83,24 @@ class LinkController extends Controller
 
     public function edit(Link $link): View
     {
+        // Verify link belongs to current clinic
+        $currentClinicId = session('current_clinic_id');
+        if ($currentClinicId && $link->clinic_id !== $currentClinicId) {
+            return redirect()->route('dashboard.links.index')->with('error', 'غير مصرح لك بالوصول لهذا الرابط.');
+        }
+
         $link->load('clinic');
         return view('dashboard.links.form', ['link' => $link, 'clinic' => $link->clinic]);
     }
 
     public function update(Request $request, Link $link): RedirectResponse
     {
+        // Verify link belongs to current clinic
+        $currentClinicId = session('current_clinic_id');
+        if ($currentClinicId && $link->clinic_id !== $currentClinicId) {
+            return redirect()->route('dashboard.links.index')->with('error', 'غير مصرح لك بالتعديل على هذا الرابط.');
+        }
+
         $validated = $request->validate([
             'type' => ['required', 'string', 'in:'.implode(',', array_keys(Link::TYPES))],
             'label' => ['nullable', 'string', 'max:100'],
@@ -98,6 +122,12 @@ class LinkController extends Controller
 
     public function destroy(Link $link): RedirectResponse
     {
+        // Verify link belongs to current clinic
+        $currentClinicId = session('current_clinic_id');
+        if ($currentClinicId && $link->clinic_id !== $currentClinicId) {
+            return redirect()->route('dashboard.links.index')->with('error', 'غير مصرح لك بحذف هذا الرابط.');
+        }
+
         $link->delete();
         return redirect()->route('dashboard.links.index')->with('success', 'تم حذف الرابط.');
     }

@@ -9,7 +9,7 @@ class LinkDoctor extends Model
     use HasFactory;
     protected $fillable = ['doctor_id', 'linkOne', 'linkTwo', 'linkThree'];
 
-    public function doctor()
+    public function doctors()
     {
         return $this->belongsTo(Doctor::class);
     }
