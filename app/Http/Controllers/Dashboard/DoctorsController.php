@@ -40,7 +40,6 @@ class DoctorsController extends Controller
             ->orderBy('name')
             ->get();
 
-            dd($doctors);
         return view('dashboard.doctors.index', compact('doctors'));
     }
 
