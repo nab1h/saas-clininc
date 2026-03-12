@@ -132,10 +132,15 @@
                             </a>
 
                             <a class="nav-link" href="{{ route('dashboard.doctors.index') }}">
-                                <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                                <div class="sb-nav-link-icon"><i class="fas fa-user-md"></i></div>
                                 الأطباء
                             </a>
-                            
+
+                            <a class="nav-link" href="{{ route('dashboard.faqs.index') }}">
+                                <div class="sb-nav-link-icon"><i class="fas fa-question-circle"></i></div>
+                                الأسئلة الشائعة
+                            </a>
+
                             <a class="nav-link" href="{{ route('dashboard.settings.index') }}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                                 اعدادات الموقع العامة
