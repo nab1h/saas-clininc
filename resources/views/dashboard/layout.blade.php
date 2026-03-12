@@ -92,7 +92,7 @@
                                 لوحة التحكم
                             </a>
 
-                            @if(auth()->user()->isSuperAdmin() || auth()->user()->getRoleInClinic($currentClinicId ?? 0)?->slug === 'owner')
+                            @if(auth()->user()->isSuperAdmin() || auth()->user()->getRoleInClinic($currentClinicId ?? 0)?->slug === 'admin')
                             <a class="nav-link" href="{{ route('dashboard.users.index') }}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
                                 المستخدمين

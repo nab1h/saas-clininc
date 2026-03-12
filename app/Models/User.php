@@ -116,7 +116,7 @@ class User extends Authenticatable
             return true;
         }
 
-        return $this->clinics()->where('id', $clinicId)->exists();
+        return $this->clinics()->where('clinics.id', $clinicId)->exists();
     }
 
     /**

@@ -68,14 +68,16 @@ Route::prefix('dashboard')->name('dashboard.')->middleware(['auth', \App\Http\Mi
     })->name('switch.clinic');
 
     Route::get('/', [DashboardController::class, 'index'])->name('index');
-    Route::get('/users', [UserController::class, 'index'])->name('users.index');
-    Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
-    Route::post('/users', [UserController::class, 'store'])->name('users.store');
-    Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
-    Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
-    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
-    Route::post('/users/{user}/assign-clinic', [UserController::class, 'assignClinic'])->name('users.assignClinic');
-    Route::post('/users/{user}/remove-clinic', [UserController::class, 'removeClinic'])->name('users.removeClinic');
+    Route::middleware(['role:admin'])->group(function () {
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
+        Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+        Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+        Route::post('/users/{user}/assign-clinic', [UserController::class, 'assignClinic'])->name('users.assignClinic');
+        Route::post('/users/{user}/remove-clinic', [UserController::class, 'removeClinic'])->name('users.removeClinic');
+    });
     Route::get('/clinics', [ClinicController::class, 'index'])->name('clinics.index');
     Route::get('/clinics/create', [ClinicController::class, 'create'])->name('clinics.create');
     Route::post('/clinics', [ClinicController::class, 'store'])->name('clinics.store');
