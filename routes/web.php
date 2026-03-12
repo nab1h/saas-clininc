@@ -42,6 +42,10 @@ Route::get('/register', function () {
 Route::post('/register', [\App\Http\Controllers\Auth\RegisteredUserController::class, 'store'])
     ->middleware('throttle:6,1');
 
+Route::get('/pending-approval', function () {
+    return view('pending-approval');
+})->name('pending.approval');
+
 Route::post('/logout', [\App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'destroy'])
     ->name('logout');
 
@@ -77,6 +81,8 @@ Route::prefix('dashboard')->name('dashboard.')->middleware(['auth', \App\Http\Mi
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
         Route::post('/users/{user}/assign-clinic', [UserController::class, 'assignClinic'])->name('users.assignClinic');
         Route::post('/users/{user}/remove-clinic', [UserController::class, 'removeClinic'])->name('users.removeClinic');
+        Route::post('/users/{user}/approve', [UserController::class, 'approveUser'])->name('users.approve');
+        Route::post('/users/{user}/reject', [UserController::class, 'rejectUser'])->name('users.reject');
     });
     Route::get('/clinics', [ClinicController::class, 'index'])->name('clinics.index');
     Route::get('/clinics/create', [ClinicController::class, 'create'])->name('clinics.create');

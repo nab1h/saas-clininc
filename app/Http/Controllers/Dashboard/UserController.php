@@ -56,7 +56,7 @@ class UserController extends Controller
 
     public function edit(User $user): View
     {
-        $user->load('clinics', 'clinics.roles');
+        $user->load('clinics');
         $roles = Role::all();
         return view('dashboard.users.form', compact('user', 'roles'));
     }
@@ -132,5 +132,19 @@ class UserController extends Controller
         $clinic->users()->detach($user->id);
 
         return redirect()->route('dashboard.users.index')->with('success', 'تم إزالة المستخدم من العيادة.');
+    }
+
+    public function approveUser(User $user): RedirectResponse
+    {
+        $user->update(['is_approved' => true]);
+
+        return redirect()->route('dashboard.users.index')->with('success', 'تم قبول المستخدم بنجاح.');
+    }
+
+    public function rejectUser(User $user): RedirectResponse
+    {
+        $user->delete();
+
+        return redirect()->route('dashboard.users.index')->with('success', 'تم رفض وحذف المستخدم.');
     }
 }

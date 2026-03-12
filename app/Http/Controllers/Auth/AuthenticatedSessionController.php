@@ -27,10 +27,16 @@ class AuthenticatedSessionController extends Controller
                 // Get the current user
                 $user = Auth::user();
 
-                // Get the user's clinics with pivot data
+                // Check if user is approved
+                if (!$user->is_approved) {
+                    Auth::logout();
+                    return redirect('/login')->with('error', 'حسابك قيد المراجعة من قبل الإدارة. يرجى انتظار موافقة الدخول.');
+                }
+
+                // Get user's clinics with pivot data
                 $userClinics = $user->clinics()->withPivot(['role_id'])->get();
 
-                // Find the first active clinic or the one marked as default
+                // Find first active clinic or one marked as default
                 $firstClinic = null;
                 foreach ($userClinics as $clinic) {
                     if ($clinic->is_active && $clinic->pivot->is_default) {
@@ -39,7 +45,7 @@ class AuthenticatedSessionController extends Controller
                     }
                 }
 
-                // If no default clinic, get the first active one
+                // If no default clinic, get first active one
                 if (!$firstClinic) {
                     $firstClinic = $userClinics->where('is_active', true)->first();
                 }

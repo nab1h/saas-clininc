@@ -23,8 +23,63 @@
         </div>
     @endif
 
+    <!-- Pending Users Section -->
+    @php
+        $pendingUsers = $users->filter(fn($u) => !$u->is_approved);
+        $approvedUsers = $users->filter(fn($u) => $u->is_approved);
+    @endphp
+
+    @if($pendingUsers->count() > 0)
+    <div class="card mb-4 border-warning">
+        <div class="card-header bg-warning bg-gradient text-white">
+            <i class="fas fa-clock me-1"></i> الحسابات الجديدة ({!! $pendingUsers->count() !!})
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th style="width: 60px;">ID</th>
+                            <th>الاسم</th>
+                            <th>البريد الإلكتروني</th>
+                            <th>تاريخ التسجيل</th>
+                            <th style="width: 200px;">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($pendingUsers as $u)
+                            <tr>
+                                <td><span class="badge bg-secondary">#{{ $u->id }}</span></td>
+                                <td><strong>{{ $u->name }}</strong></td>
+                                <td>{{ $u->email }}</td>
+                                <td><small class="text-muted">{{ $u->created_at->format('Y-m-d H:i') }}</small></td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <form action="{{ route('dashboard.users.approve', $u) }}" method="post" class="d-inline" onsubmit="return confirm('قبول هذا المستخدم؟');">
+                                            @csrf
+                                            <button type="submit" class="btn btn-success" title="قبول">
+                                                <i class="fas fa-check"></i> قبول
+                                            </button>
+                                        </form>
+                                        <form action="{{ route('dashboard.users.reject', $u) }}" method="post" class="d-inline" onsubmit="return confirm('رفض وحذف هذا المستخدم؟');">
+                                            @csrf
+                                            <button type="submit" class="btn btn-danger" title="رفض">
+                                                <i class="fas fa-times"></i> رفض
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <div class="card mb-4">
-        <div class="card-header"><i class="fas fa-users me-1"></i> قائمة المستخدمين</div>
+        <div class="card-header"><i class="fas fa-users me-1"></i> المستخدمين المعتمدين</div>
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-bordered table-hover align-middle">
@@ -41,7 +96,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($users as $u)
+                        @forelse($approvedUsers as $u)
                             <tr>
                                 <td><span class="badge bg-secondary">#{{ $u->id }}</span></td>
                                 <td><strong>{{ $u->name }}</strong></td>

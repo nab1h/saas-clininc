@@ -28,21 +28,21 @@ class RegisteredUserController extends Controller
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
+                'is_approved' => false,
             ]);
 
             \Log::info('User created', ['user_id' => $user->id]);
 
             event(new Registered($user));
 
-            Auth::login($user);
-
-            \Log::info('User logged in', ['user_id' => $user->id]);
+            // Don't login the user automatically
+            // Auth::login($user);
 
             if ($request->expectsJson()) {
-                return response()->json(['redirect' => '/dashboard']);
+                return response()->json(['redirect' => '/pending-approval']);
             }
 
-            return redirect('/dashboard')->with('success', 'تم إنشاء الحساب بنجاح!');
+            return redirect('/pending-approval')->with('success', 'تم إنشاء الحساب بنجاح! يرجى انتظار موافقة الإدارة.');
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::error('Validation failed', ['errors' => $e->errors()]);
             if ($request->expectsJson()) {

@@ -61,7 +61,7 @@
                                             <li class="d-flex justify-content-between align-items-center mb-2">
                                                 <div>
                                                     <strong>{{ $clinic->name }}</strong>
-                                                    <br><small class="text-muted">دور: {{ $clinic->roles->first()?->name ?? 'بدون' }}</small>
+                                                    <br><small class="text-muted">دور: {{ $clinic->pivot->role_id ? \App\Models\Role::find($clinic->pivot->role_id)->name : 'بدون' }}</small>
                                                 </div>
                                                 <form action="/dashboard/users/{{ $user->id }}/remove-clinic" method="post" class="d-inline" onsubmit="return confirm('إزالة هذا المستخدم من العيادة؟');">
                                                     @csrf
