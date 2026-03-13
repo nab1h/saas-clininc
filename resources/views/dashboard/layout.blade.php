@@ -23,10 +23,13 @@
     </head>
     <body class="sb-nav-fixed">
         <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-            <!-- Clinic Selector (if user has multiple clinics) -->
-            @if(isset($userClinics) && count($userClinics) > 1)
+            <!-- Clinic Selector (if user has multiple clinics OR is Super Admin) -->
+            @if(isset($userClinics) && (count($userClinics) > 1 || (auth()->user()->isSuperAdmin() && count($userClinics) > 0)))
                 <div class="ms-2">
                     <select class="form-select form-select-sm bg-dark text-white border-secondary" id="clinicSelector" onchange="switchClinic(this.value)">
+                        @if(auth()->user()->isSuperAdmin())
+                            <option value="">اختر عيادة</option>
+                        @endif
                         @foreach($userClinics as $c)
                             <option value="{{ $c->id }}" {{ isset($currentClinicId) && $currentClinicId == $c->id ? 'selected' : '' }}>
                                 {{ $c->name }} {{ isset($currentClinicId) && $currentClinicId == $c->id ? '(الحالي)' : '' }}

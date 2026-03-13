@@ -24,6 +24,9 @@ class DashboardController extends Controller
         $user = Auth::user();
         $isAdmin = $user && $user->clinics->count() === 0; // User not assigned to any clinic is treated as admin
 
+        // Get user's clinics for the dropdown
+        $userClinics = $isAdmin ? Clinic::where('is_active', true)->get() : $user->clinics;
+
         if ($currentClinic && !$isAdmin) {
             // إحصائيات العيادة الحالية فقط
             $totalClinics = $user->clinics->count();

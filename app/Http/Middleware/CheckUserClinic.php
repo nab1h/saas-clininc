@@ -63,8 +63,8 @@ class CheckUserClinic
         // Get current clinic from session
         $currentClinicId = session('current_clinic_id');
 
-        // Validate that current clinic belongs to the user
-        if ($currentClinicId && !$userClinics->contains('id', $currentClinicId)) {
+        // Validate that current clinic belongs to the user (skip for super admin)
+        if (!$user->isSuperAdmin() && $currentClinicId && !$userClinics->contains('id', $currentClinicId)) {
             session()->forget('current_clinic_id');
             $currentClinicId = null;
         }
