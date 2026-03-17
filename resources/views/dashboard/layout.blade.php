@@ -144,6 +144,11 @@
                                 الأسئلة الشائعة
                             </a>
 
+                            <a class="nav-link" href="{{ route('dashboard.customer-reviews.index') }}">
+                                <div class="sb-nav-link-icon"><i class="fas fa-star"></i></div>
+                                تقييمات العملاء
+                            </a>
+
                             <a class="nav-link" href="{{ route('dashboard.settings.index') }}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                                 اعدادات الموقع العامة

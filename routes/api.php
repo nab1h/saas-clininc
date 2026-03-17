@@ -13,6 +13,7 @@ use App\Models\Doctor;
 use App\Models\Faq;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\CustomerReview;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -347,6 +348,48 @@ Route::post('/{slug}/booking', function (Request $request, $slug) {
             'name' => $patient->name,
             'phone' => $patient->phone,
         ],
+    ], 201);
+});
+
+// Get customer reviews (public, only approved)
+Route::get('/{slug}/customer-reviews', function ($slug) {
+    $clinic = Clinic::where('slug', $slug)->firstOrFail();
+    return CustomerReview::where('clinic_id', $clinic->id)
+        ->where('is_approved', true)
+        ->orderBy('created_at', 'desc')
+        ->get();
+});
+
+// Add new customer review (pending approval)
+Route::post('/{slug}/customer-reviews', function (Request $request, $slug) {
+    $clinic = Clinic::where('slug', $slug)->firstOrFail();
+
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'job_title' => 'required|string|max:255',
+        'message' => 'required|string|max:2000',
+        'stars' => 'required|integer|min:1|max:5',
+    ], [
+        'name.required' => 'الاسم مطلوب.',
+        'job_title.required' => 'المسمى الوظيفي مطلوب.',
+        'message.required' => 'الرسالة مطلوبة.',
+        'stars.required' => 'التقييم مطلوب.',
+        'stars.min' => 'التقييم يجب أن يكون على الأقل 1 نجمة.',
+        'stars.max' => 'التقييم يجب أن يكون على الأكثر 5 نجوم.',
+    ]);
+
+    $review = CustomerReview::create([
+        'clinic_id' => $clinic->id,
+        'name' => $validated['name'],
+        'job_title' => $validated['job_title'],
+        'message' => $validated['message'],
+        'stars' => $validated['stars'],
+        'is_approved' => false,
+    ]);
+
+    return response()->json([
+        'message' => 'تم إرسال تقييمك بنجاح وسيتم مراجعته',
+        'review' => $review,
     ], 201);
 });
 
