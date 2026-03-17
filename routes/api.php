@@ -34,7 +34,7 @@ Route::get('/{slug}/articles', function ($slug) {
             'slug' => $article->slug,
             'body' => $article->body,
             'excerpt' => $article->excerpt ?? null,
-            'featured_image' => $article->featured_image ?? null,
+            'featured_image' => $article->image ?? null,
             'is_published' => $article->is_published,
             'is_favorite' => $article->is_favorite ?? false,
             'created_at' => $article->created_at,
