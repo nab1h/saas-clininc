@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
     <head>
         <meta charset="utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -19,6 +19,7 @@
         @endif
         <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
         <link href="{{ asset('dash-assets/css/styles.css') }}" rel="stylesheet" />
+        <link href="{{ asset('css/clinic-modern.css') }}" rel="stylesheet" />
         <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
     </head>
     <body class="sb-nav-fixed">
@@ -84,6 +85,23 @@
                 });
             }
         </script>
+
+        <script>
+            // Handle logout button click in sidebar
+            document.addEventListener('DOMContentLoaded', function() {
+                const sidebarFooter = document.querySelector('.sb-sidenav-footer');
+                if (sidebarFooter) {
+                    sidebarFooter.addEventListener('click', function(e) {
+                        // Submit the logout form
+                        const logoutForm = document.getElementById('logout-form');
+                        if (logoutForm) {
+                            logoutForm.submit();
+                        }
+                    });
+                }
+            });
+        </script>
+
         <div id="layoutSidenav">
             <div id="layoutSidenav_nav">
                 <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">

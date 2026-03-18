@@ -6,8 +6,8 @@
     <div class="container-fluid px-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h1 class="h3 mb-0">لوحة تحكم النظام SaaS</h1>
-                <p class="text-muted mb-0 small">نظرة عامة على العيادات والإحصائيات</p>
+                <h1 class="h3 mb-0">لوحة تحكم العيادة</h1>
+                <p class="text-muted mb-0 small">نظرة عامة على العيادة والإحصائيات</p>
             </div>
             <div class="text-muted small">
                 <i class="fas fa-calendar-alt me-1"></i> {{ \Carbon\Carbon::now()->format('d/m/Y H:i') }}
