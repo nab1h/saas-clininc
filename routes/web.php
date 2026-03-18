@@ -146,4 +146,5 @@ Route::prefix('dashboard')->name('dashboard.')->middleware(['auth', \App\Http\Mi
     Route::get('/booking', [\App\Http\Controllers\Dashboard\BookingController::class, 'index'])->name('booking.index');
     Route::get('/booking/{appointment}', [\App\Http\Controllers\Dashboard\BookingController::class, 'show'])->name('booking.show');
     Route::patch('/booking/{appointment}/status', [\App\Http\Controllers\Dashboard\BookingController::class, 'updateStatus'])->name('booking.updateStatus');
+    Route::delete('/booking/{appointment}', [\App\Http\Controllers\Dashboard\BookingController::class, 'destroy'])->name('booking.destroy');
 });

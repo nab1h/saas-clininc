@@ -26,19 +26,22 @@ class BookingController extends Controller
 
         // Show appointments ONLY for current logged-in clinic (not all clinics)
         $query = Appointment::with(['patient', 'service', 'clinic'])
-            ->where('clinic_id', $currentClinicId)
-            ->orderBy('appointment_date', 'desc')
-            ->orderBy('start_time', 'desc');
+            ->where('clinic_id', $currentClinicId);
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
+        // Apply filters
+        if ($request->has('status') && $request->filled('status')) {
+            $query->where('status', $request->input('status'));
         }
-        if ($request->filled('from')) {
-            $query->whereDate('appointment_date', '>=', $request->from);
+        if ($request->has('from') && $request->filled('from')) {
+            $query->where('appointment_date', '>=', $request->input('from'));
         }
-        if ($request->filled('to')) {
-            $query->whereDate('appointment_date', '<=', $request->to);
+        if ($request->has('to') && $request->filled('to')) {
+            $query->where('appointment_date', '<=', $request->input('to'));
         }
+
+        // Order by date (newest first) then by time
+        $query->orderBy('appointment_date', 'desc')
+            ->orderBy('start_time', 'desc');
 
         $bookings = $query->paginate(15)->withQueryString();
 
@@ -72,5 +75,17 @@ class BookingController extends Controller
         return redirect()
             ->route('dashboard.booking.index')
             ->with('success', 'تم تحديث حالة الحجز.');
+    }
+
+    public function destroy(Appointment $appointment): RedirectResponse
+    {
+        // Verify appointment belongs to current clinic
+        $currentClinicId = session('current_clinic_id');
+        if ($currentClinicId && $appointment->clinic_id !== $currentClinicId) {
+            return redirect()->route('dashboard.booking.index')->with('error', 'غير مصرح لك بحذف هذا الموعد.');
+        }
+
+        $appointment->delete();
+        return redirect()->route('dashboard.booking.index')->with('success', 'تم حذف الموعد بنجاح.');
     }
 }

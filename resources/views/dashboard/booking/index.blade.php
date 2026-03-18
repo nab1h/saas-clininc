@@ -40,7 +40,7 @@
                             <th>الخدمة</th>
                             <th>الحالة</th>
                             <th>اتصال</th>
-                            <th>إجراء</th>
+                            <th>الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -86,7 +86,18 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <a href="{{ route('dashboard.booking.show', $b) }}" class="btn btn-sm btn-outline-primary">عرض</a>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ route('dashboard.booking.show', $b) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i> عرض
+                                        </a>
+                                        <form method="POST" action="{{ route('dashboard.booking.destroy', $b) }}" onsubmit="return confirm('هل أنت متأكد من حذف هذا الموعد؟');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
