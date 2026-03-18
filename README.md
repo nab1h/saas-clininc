@@ -1,59 +1,349 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Clinic Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+<div align="center">
 
-## About Laravel
+![Laravel](https://img.shields.io/badge/Laravel-12.0-red?logo=laravel)
+![PHP](https://img.shields.io/badge/PHP-8.2+-blue?logo=php)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+[English](#english) | [العربية](#arabic)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+</div>
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## English
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### Overview
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Clinic Management System is a comprehensive web application built with Laravel 12 designed to streamline clinic operations and enhance patient care. This multi-tenant SaaS platform enables clinics to manage appointments, patients, doctors, services, invoices, and more through an intuitive dashboard interface.
 
-## Laravel Sponsors
+### Features
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- **Multi-Tenant Architecture**: Support for multiple clinics with dedicated workspaces
+- **User Management**: Role-based access control (Admin, Manager, Staff)
+- **Patient Management**: Complete patient profiles with medical history
+- **Appointment Booking**: Online booking system with calendar integration
+- **Doctor Management**: Manage doctor profiles, specialties, and schedules
+- **Service Catalog**: Organize and manage clinic services with pricing
+- **Invoice System**: Generate and track invoices with payment status
+- **Article Management**: Publish health articles and educational content
+- **FAQ Section**: Frequently asked questions management
+- **Social Authentication**: Google, Facebook, and Apple login integration
+- **Customer Reviews**: Collect and display patient testimonials
+- **Custom Scripts & Links**: Add custom JavaScript and navigation links
+- **Settings Panel**: Comprehensive clinic customization options
 
-### Premium Partners
+### Tech Stack
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+- **Backend**: Laravel 12.0
+- **Frontend**: Blade Templates, Vite, JavaScript
+- **Database**: SQLite (configurable for MySQL/PostgreSQL)
+- **Authentication**: Laravel Sanctum
+- **Social Auth**: Laravel Socialite
 
-## Contributing
+### Installation
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+#### Prerequisites
 
-## Code of Conduct
+- PHP 8.2 or higher
+- Composer
+- Node.js & NPM
+- SQLite, MySQL, or PostgreSQL
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+#### Setup
 
-## Security Vulnerabilities
+1. **Clone the repository**
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+git clone https://github.com/yourusername/clinic.git
+cd clinic
+```
 
-## License
+2. **Install dependencies**
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+composer install
+npm install
+```
+
+3. **Environment setup**
+
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+4. **Database configuration**
+
+```bash
+php artisan migrate
+```
+
+5. **Build assets**
+
+```bash
+npm run build
+```
+
+6. **Start development server**
+
+```bash
+php artisan serve
+```
+
+Visit `http://localhost:8000` in your browser.
+
+### Configuration
+
+#### Social Authentication
+
+Add your social media credentials to `.env`:
+
+```env
+# Google
+GOOGLE_CLIENT_ID=your_client_id
+GOOGLE_CLIENT_SECRET=your_client_secret
+GOOGLE_REDIRECT_URI=http://localhost:8000/auth/google/callback
+
+# Facebook
+FACEBOOK_CLIENT_ID=your_client_id
+FACEBOOK_CLIENT_SECRET=your_client_secret
+FACEBOOK_REDIRECT_URI=http://localhost:8000/auth/facebook/callback
+
+# Apple
+APPLE_CLIENT_ID=your_client_id
+APPLE_CLIENT_SECRET=your_client_secret
+APPLE_REDIRECT_URI=http://localhost:8000/auth/apple/callback
+```
+
+#### Database Configuration
+
+To use MySQL or PostgreSQL instead of SQLite, update `.env`:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=clinic_db
+DB_USERNAME=root
+DB_PASSWORD=your_password
+```
+
+### Project Structure
+
+```
+clinic/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── Dashboard/
+│   │   │   └── Auth/
+│   │   └── Middleware/
+│   ├── Models/
+│   └── Providers/
+├── config/
+├── database/
+│   ├── migrations/
+│   └── seeders/
+├── public/
+├── resources/
+│   └── views/
+└── routes/
+```
+
+### Available Commands
+
+```bash
+# Run all tests
+composer test
+
+# Run development server with queue and logs
+composer dev
+
+# Code style checking
+./vendor/bin/pint
+
+# Clear application cache
+php artisan cache:clear
+```
+
+### Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+### License
+
+This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+---
+
+## العربية
+
+### نظرة عامة
+
+نظام إدارة العيادات هو تطبيق ويب شامل مبني بإطار عمل Laravel 12، مصمم لتبسيط عمليات العيادة وتحسين رعاية المرضى. هذه المنصة السحابية متعددة المستأجرين تمكن العيادات من إدارة المواعيد والمرضى والأطباء والخدمات والفواتير والمزيد من خلال واجهة لوحة تحكم بديهية.
+
+### المميزات
+
+- **بنية متعددة المستأجرين**: دعم عيادات متعددة مع مساحات عمل مخصصة
+- **إدارة المستخدمين**: نظام صلاحيات قائم على الأدوار (مدير، مشرف، موظف)
+- **إدارة المرضى**: ملفات مرضى كاملة مع السجلات الطبية
+- **حجز المواعيد**: نظام حجز إلكتروني مع تكامل التقويم
+- **إدارة الأطباء**: إدارة ملفات الأطباء والتخصصات والجداول الزمنية
+- **كتالوج الخدمات**: تنظيم وإدارة خدمات العيادة مع الأسعار
+- **نظام الفواتير**: إنشاء وتتبع الفواتير مع حالة الدفع
+- **إدارة المقالات**: نشر مقالات صحية ومحتوى تعليمي
+- **قسم الأسئلة الشائعة**: إدارة الأسئلة المتكررة
+- **المصادقة الاجتماعية**: تكامل تسجيل الدخول عبر جوجل وفيسبوك وأبل
+- **مراجعات العملاء**: جمع وعرض شهادات المرضى
+- **سكريبتات وروابط مخصصة**: إضافة JavaScript وروابط تنقل مخصصة
+- **لوحة الإعدادات**: خيارات تخصيص شاملة للعيادة
+
+### التقنيات المستخدمة
+
+- **الواجهة الخلفية**: Laravel 12.0
+- **الواجهة الأمامية**: قوالب Blade، Vite، JavaScript
+- **قاعدة البيانات**: SQLite (قابل للتكوين لـ MySQL/PostgreSQL)
+- **المصادقة**: Laravel Sanctum
+- **المصادقة الاجتماعية**: Laravel Socialite
+
+### التثبيت
+
+#### المتطلبات
+
+- PHP 8.2 أو أحدث
+- Composer
+- Node.js و NPM
+- SQLite، MySQL، أو PostgreSQL
+
+#### الإعداد
+
+1. **استنساخ المستودع**
+
+```bash
+git clone https://github.com/yourusername/clinic.git
+cd clinic
+```
+
+2. **تثبيت التبعيات**
+
+```bash
+composer install
+npm install
+```
+
+3. **إعداد البيئة**
+
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+4. **تكوين قاعدة البيانات**
+
+```bash
+php artisan migrate
+```
+
+5. **بناء الأصول**
+
+```bash
+npm run build
+```
+
+6. **تشغيل خادم التطوير**
+
+```bash
+php artisan serve
+```
+
+زُر `http://localhost:8000` في المتصفح.
+
+### التكوين
+
+#### المصادقة الاجتماعية
+
+أضف بيانات الاعتماد لوسائل التواصل الاجتماعي في `.env`:
+
+```env
+# جوجل
+GOOGLE_CLIENT_ID=your_client_id
+GOOGLE_CLIENT_SECRET=your_client_secret
+GOOGLE_REDIRECT_URI=http://localhost:8000/auth/google/callback
+
+# فيسبوك
+FACEBOOK_CLIENT_ID=your_client_id
+FACEBOOK_CLIENT_SECRET=your_client_secret
+FACEBOOK_REDIRECT_URI=http://localhost:8000/auth/facebook/callback
+
+# أبل
+APPLE_CLIENT_ID=your_client_id
+APPLE_CLIENT_SECRET=your_client_secret
+APPLE_REDIRECT_URI=http://localhost:8000/auth/apple/callback
+```
+
+#### تكوين قاعدة البيانات
+
+لاستخدام MySQL أو PostgreSQL بدلاً من SQLite، حدّث `.env`:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=clinic_db
+DB_USERNAME=root
+DB_PASSWORD=your_password
+```
+
+### هيكل المشروع
+
+```
+clinic/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── Dashboard/
+│   │   │   └── Auth/
+│   │   └── Middleware/
+│   ├── Models/
+│   └── Providers/
+├── config/
+├── database/
+│   ├── migrations/
+│   └── seeders/
+├── public/
+├── resources/
+│   └── views/
+└── routes/
+```
+
+### الأوامر المتاحة
+
+```bash
+# تشغيل جميع الاختبارات
+composer test
+
+# تشغيل خادم التطوير مع قائمة الانتظار والسجلات
+composer dev
+
+# فحص نمط الكود
+./vendor/bin/pint
+
+# مسح ذاكرة التخزين المؤقت للتطبيق
+php artisan cache:clear
+```
+
+### المساهمة
+
+المساهمات مرحب بها! لا تتردد في إرسال طلب سحب (Pull Request).
+
+### الترخيص
+
+هذا المشروع هو برمجيات مفتوحة المصدر مرخصة تحت [ترخيص MIT](https://opensource.org/licenses/MIT).
+
+---
+
+<div align="center">
+Made with ❤️ for healthcare providers
+</div>
