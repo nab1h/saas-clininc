@@ -82,6 +82,8 @@ Route::get('/{slug}/settings', function ($slug) {
         'phone' => $clinic->phone,
         'address' => $clinic->address,
         'logo' => $clinic->logo,
+        'background_image' => $clinic->background_image,
+        'surrounding_image' => $clinic->surrounding_image,
         'favicon' => $clinic->settings['favicon'] ?? null,
         'icon_16' => $clinic->settings['icon_16'] ?? null,
         'icon_32' => $clinic->settings['icon_32'] ?? null,

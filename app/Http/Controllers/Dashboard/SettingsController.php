@@ -69,6 +69,8 @@ class SettingsController extends Controller
             'icon_180' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:1024'],
             'icon_192' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:1024'],
             'icon_512' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
+            'background_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:5120'],
+            'surrounding_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:5120'],
         ];
 
         // Add basic info rules only if fields are present and not empty
@@ -131,6 +133,32 @@ class SettingsController extends Controller
                 Storage::disk('public')->delete($clinic->logo);
             }
             $data['logo'] = $request->file('logo')->store('clinic', 'public');
+        }
+
+        // Handle background image (upload or remove)
+        if ($request->input('remove_background_image') == '1') {
+            if ($clinic->background_image) {
+                Storage::disk('public')->delete($clinic->background_image);
+            }
+            $data['background_image'] = null;
+        } elseif ($request->hasFile('background_image')) {
+            if ($clinic->background_image) {
+                Storage::disk('public')->delete($clinic->background_image);
+            }
+            $data['background_image'] = $request->file('background_image')->store('clinic', 'public');
+        }
+
+        // Handle surrounding image (upload or remove)
+        if ($request->input('remove_surrounding_image') == '1') {
+            if ($clinic->surrounding_image) {
+                Storage::disk('public')->delete($clinic->surrounding_image);
+            }
+            $data['surrounding_image'] = null;
+        } elseif ($request->hasFile('surrounding_image')) {
+            if ($clinic->surrounding_image) {
+                Storage::disk('public')->delete($clinic->surrounding_image);
+            }
+            $data['surrounding_image'] = $request->file('surrounding_image')->store('clinic', 'public');
         }
 
         // Content settings

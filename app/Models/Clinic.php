@@ -18,6 +18,8 @@ class Clinic extends Model
         'phone',
         'address',
         'logo',
+        'background_image',
+        'surrounding_image',
         'settings',
         'subscription_plan',
         'trial_ends_at',

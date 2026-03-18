@@ -243,6 +243,64 @@
             </div>
         </div>
 
+        <!-- صور الخلفية والمحيط -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-image me-2"></i>
+                        صور الخلفية والمحيط
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('dashboard.settings.update') }}" method="POST" id="images-form" enctype="multipart/form-data">
+                        @csrf
+
+                        <div class="mb-3">
+                            <label for="background_image" class="form-label">صورة الخلفية</label>
+                            @if($clinic->background_image)
+                                <div class="mb-2">
+                                    <img src="{{ asset('storage/' . $clinic->background_image) }}" alt="Background Image" class="img-thumbnail w-100" style="max-height: 200px; object-fit: cover;">
+                                    <div class="mt-2">
+                                        <a href="javascript:void(0)" onclick="document.getElementById('remove_background_image').value='1'; document.getElementById('images-form').submit();" class="text-danger btn-sm">
+                                            <i class="fas fa-trash"></i> حذف
+                                        </a>
+                                    </div>
+                                </div>
+                            @endif
+                            <input type="file" class="form-control" id="background_image" name="background_image" accept="image/*">
+                            <input type="hidden" name="remove_background_image" id="remove_background_image" value="0">
+                            <small class="text-muted">صورة الخلفية للموقع (يتم عرضها في الخلفية)</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="surrounding_image" class="form-label">صورة المحيط</label>
+                            @if($clinic->surrounding_image)
+                                <div class="mb-2">
+                                    <img src="{{ asset('storage/' . $clinic->surrounding_image) }}" alt="Surrounding Image" class="img-thumbnail w-100" style="max-height: 200px; object-fit: cover;">
+                                    <div class="mt-2">
+                                        <a href="javascript:void(0)" onclick="document.getElementById('remove_surrounding_image').value='1'; document.getElementById('images-form').submit();" class="text-danger btn-sm">
+                                            <i class="fas fa-trash"></i> حذف
+                                        </a>
+                                    </div>
+                                </div>
+                            @endif
+                            <input type="file" class="form-control" id="surrounding_image" name="surrounding_image" accept="image/*">
+                            <input type="hidden" name="remove_surrounding_image" id="remove_surrounding_image" value="0">
+                            <small class="text-muted">صورة المحيط (يتم عرضها في أعلى الصفحة أو الهيدر)</small>
+                        </div>
+
+                        <div class="mt-3">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-save me-2"></i>
+                                حفظ الصور
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <!-- معلومات الإعدادات -->
         <div class="col-lg-6 mb-4">
             <div class="card shadow mb-4">
