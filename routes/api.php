@@ -89,7 +89,15 @@ Route::get('/{slug}/settings', function ($slug) {
         'icon_180' => $clinic->settings['icon_180'] ?? null,
         'icon_192' => $clinic->settings['icon_192'] ?? null,
         'icon_512' => $clinic->settings['icon_512'] ?? null,
-        'settings' => $clinic->settings,
+        'google_maps' => $clinic->settings['google_maps'] ?? null,
+        'working_hours' => $clinic->settings['working_hours'] ?? null,
+        'settings' => [
+            'content' => $clinic->settings['content'] ?? null,
+            'message' => $clinic->settings['message'] ?? null,
+            'footer_text' => $clinic->settings['footer_text'] ?? null,
+            'brand_color' => $clinic->settings['brand_color'] ?? null,
+            'primary_color' => $clinic->settings['primary_color'] ?? null,
+        ],
     ]);
 });
 

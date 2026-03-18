@@ -84,6 +84,12 @@ class SettingsController extends Controller
         if ($request->filled('address')) {
             $rules['address'] = ['nullable', 'string', 'max:500'];
         }
+        if ($request->filled('google_maps')) {
+            $rules['google_maps'] = ['nullable', 'string', 'max:1000'];
+        }
+        if ($request->filled('working_hours')) {
+            $rules['working_hours'] = ['nullable', 'string', 'max:500'];
+        }
 
         $validated = $request->validate($rules);
 
@@ -103,6 +109,17 @@ class SettingsController extends Controller
             $data['address'] = $request->input('address');
         }
 
+        // Update settings - only update fields that are present and not empty
+        $settings = $clinic->settings ?? [];
+
+        // Basic info settings
+        if ($request->filled('google_maps')) {
+            $settings['google_maps'] = $request->input('google_maps');
+        }
+        if ($request->filled('working_hours')) {
+            $settings['working_hours'] = $request->input('working_hours');
+        }
+
         // Handle logo (upload or remove)
         if ($request->input('remove_logo') == '1') {
             if ($clinic->logo) {
@@ -115,9 +132,6 @@ class SettingsController extends Controller
             }
             $data['logo'] = $request->file('logo')->store('clinic', 'public');
         }
-
-        // Update settings - only update fields that are present and not empty
-        $settings = $clinic->settings ?? [];
 
         // Content settings
         if ($request->filled('content')) {

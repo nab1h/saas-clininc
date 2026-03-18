@@ -81,6 +81,21 @@
                             <textarea class="form-control" id="address" name="address" rows="2">{{ old('address', $clinic->address) }}</textarea>
                         </div>
 
+                        <div class="mb-3">
+                            <label for="google_maps" class="form-label">Google Maps <i class="fas fa-map-marker-alt ms-1 text-muted"></i></label>
+                            <input type="text" class="form-control" id="google_maps" name="google_maps"
+                                   value="{{ old('google_maps', $clinic->settings['google_maps'] ?? '') }}"
+                                   placeholder="رابط Google Maps أو كود الموقع">
+                            <small class="text-muted">الصق رابط Google Maps من متصفحك</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="working_hours" class="form-label">ساعات العمل <i class="fas fa-clock ms-1 text-muted"></i></label>
+                            <input type="text" class="form-control" id="working_hours" name="working_hours"
+                                   value="{{ old('working_hours', $clinic->settings['working_hours'] ?? '') }}"
+                                   placeholder="مثال: السبت - الخميس: 9 صباحاً - 5 مساءً">
+                        </div>
+
                         <div class="mt-4">
                             <button type="submit" formaction="{{ route('dashboard.settings.update') }}" class="btn btn-primary w-100">
                                 <i class="fas fa-save me-2"></i>
